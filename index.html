@@ -11,7 +11,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.75); }
-        /* MOBİL UYUM: Modal içeriğinin yüksekliği mobil için ayarlandı */
         .modal-content { max-height: 95vh; }
         .table-header-sticky th { position: sticky; top: 0; background-color: #1e3a8a; color: white; z-index: 10; }
         .fark-pozitif { background-color: #dcfce7; color: #166534; font-weight: bold; }
@@ -49,7 +48,6 @@
         .save-btn { color: #22c55e; } .save-btn:hover { background-color: #dcfce7; }
         .cancel-btn { color: #6b7280; } .cancel-btn:hover { background-color: #f3f4f6; }
         .confirm-delete { color: white !important; background-color: #ef4444 !important; }
-        /* MOBİL UYUM: Yatayda kaydırılabilir tab menüsü için */
         .scrollable-tabs::-webkit-scrollbar { display: none; }
         .scrollable-tabs { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -57,19 +55,16 @@
 <body class="antialiased text-gray-800">
 
     <header class="bg-white shadow-md sticky top-0 z-40">
-        <!-- MOBİL UYUM: Header padding ve yükseklik ayarlandı -->
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
                 <div class="flex items-center">
                     <img src="https://placehold.co/100x40/002d72/ffffff?text=TKGM" alt="TKGM Logo" class="h-8 md:h-10">
                     <div class="ml-3 md:ml-4">
-                        <!-- MOBİL UYUM: Yazı boyutları ayarlandı -->
                         <h1 class="text-lg md:text-xl font-bold text-gray-900">Birim Yönetim Portalı</h1>
                         <p class="text-xs md:text-sm text-gray-500">Elazığ Bölge Müdürlüğü</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4">
-                    <!-- MOBİL UYUM: Uzun yazı mobil ve tablette gizlendi -->
                     <span class="hidden lg:block text-sm md:text-md font-bold text-blue-900">Tapu ve Kadastro XVI.(Elazığ) Bölge Müdürlüğü</span>
                     <i class="fa-solid fa-star text-yellow-400"></i>
                     <i class="fa-solid fa-star text-blue-800"></i>
@@ -78,17 +73,14 @@
         </div>
     </header>
 
-    <!-- MOBİL UYUM: Ana içerik padding'i ayarlandı -->
     <main class="container mx-auto p-4 lg:p-8">
         <div id="dashboard-container" class="mb-10">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-                <!-- MOBİL UYUM: Başlık boyutu ayarlandı -->
                 <h2 class="text-2xl md:text-3xl font-bold group-header flex-shrink-0" style="margin-bottom: 0;">Genel Durum Panosu</h2>
                 <div id="summary-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full"></div>
             </div>
         </div>
         <div id="bolge-section" class="mb-10">
-            <!-- MOBİL UYUM: Başlık boyutu ayarlandı -->
             <h2 class="text-xl md:text-2xl font-bold group-header">Bölge Müdürlüğü</h2>
             <div id="bolge-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
@@ -113,19 +105,19 @@
             <div id="tunceli-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
     </main>
+    
+    <!-- YENİ: Footer eklendi -->
+    <footer class="text-center py-6">
+        <p class="text-sm text-gray-600">© Gökhan ELGÜL tarafından tasarlanmıştır.</p>
+    </footer>
 
-    <!-- MOBİL UYUM: Modal padding'i ayarlandı -->
     <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 hidden modal-backdrop">
-        <!-- MOBİL UYUM: Modal mobil için tam ekran, büyük ekran için normal -->
         <div id="modal-content" class="bg-white shadow-2xl w-full h-full sm:h-auto sm:w-full max-w-6xl flex flex-col modal-content sm:rounded-lg">
-            <!-- MOBİL UYUM: Modal başlık padding ve yazı boyutu ayarlandı -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg">
                 <h3 id="modal-title" class="text-xl md:text-2xl font-bold text-gray-900"></h3>
                 <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-lg"></i></button>
             </div>
-            <!-- MOBİL UYUM: Modal içerik padding'i ayarlandı -->
             <div class="flex-grow p-4 md:p-6 overflow-y-auto">
-                <!-- MOBİL UYUM: Tab menüsü yatayda kaydırılabilir yapıldı -->
                 <div class="border-b border-gray-200 mb-6">
                     <nav id="modal-tabs" class="scrollable-tabs -mb-px flex space-x-4 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
                         <button data-tab="personnel" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg"><i class="fas fa-users mr-2"></i>Personel Durumu</button>
@@ -154,33 +146,28 @@
                         </div>
                     </div>
                     <div id="personnel-list-content" class="tab-pane hidden">
-                        <!-- MOBİL UYUM: Butonlar ve arama kutusu alt alta gelecek şekilde ayarlandı -->
+                        <!-- GÜNCELLEME: Bu alandaki yönetim butonları kaldırıldı, sadece arama ve dışa aktarma kaldı -->
                         <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                             <div class="relative w-full sm:w-auto flex-grow">
                                 <input type="text" id="personnel-search-input" placeholder="Personel ara..." class="w-full pl-10 pr-4 py-2 border rounded-full">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
                             </div>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <input type="file" id="import-personnel-excel-input" class="hidden" accept=".xlsx, .xls">
-                                <button id="import-personnel-excel-btn" class="w-1/2 sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-file-import mr-2"></i>Yükle</button>
-                                <button id="export-personnel-list-excel-btn" class="w-1/2 sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-file-export mr-2"></i>Aktar</button>
+                            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                                <button id="export-personnel-list-excel-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-file-export mr-2"></i>Listeyi Dışa Aktar</button>
                             </div>
                         </div>
                         <div class="overflow-auto rounded-lg border" style="max-height: 55vh;">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="table-header-sticky">
+                                    <!-- GÜNCELLEME: İşlemler sütunu kaldırıldı -->
                                     <tr>
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th>
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th>
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th>
-                                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider w-28">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody id="personnel-list-table-body" class="bg-white divide-y divide-gray-200"></tbody>
                             </table>
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <button id="add-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button>
                         </div>
                     </div>
                     <div id="projects-content" class="tab-pane hidden">
@@ -214,7 +201,6 @@
                 
                 <div id="central-tab-content">
                     <div id="central-personnel-list-content" class="central-tab-pane">
-                        <!-- MOBİL UYUM: Butonlar ve arama kutusu alt alta gelecek şekilde ayarlandı -->
                         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                             <div class="relative w-full md:w-auto flex-grow">
                                 <input type="text" id="all-personnel-search-input" placeholder="Personel veya Birim Ara..." class="w-full pl-10 pr-4 py-2 border rounded-full">
@@ -310,9 +296,6 @@
         const personnelListTableBody = document.getElementById('personnel-list-table-body');
         const personnelSearchInput = document.getElementById('personnel-search-input');
         const exportPersonnelListExcelBtn = document.getElementById('export-personnel-list-excel-btn');
-        const importPersonnelExcelBtn = document.getElementById('import-personnel-excel-btn');
-        const importPersonnelExcelInput = document.getElementById('import-personnel-excel-input');
-        const addPersonnelBtn = document.getElementById('add-personnel-btn');
         const lightbox = document.getElementById('lightbox');
         const lightboxContentWrapper = document.getElementById('lightbox-content-wrapper');
         const lightboxCloseBtn = document.getElementById('lightbox-close');
@@ -349,7 +332,7 @@
                     const parsedData = JSON.parse(savedData);
                     if (Array.isArray(parsedData) && parsedData.every(item => 'id' in item && 'name' in item)) {
                         directorateData = parsedData;
-                        return true; // Kayıtlı veri bulundu ve yüklendi.
+                        return true;
                     } else { throw new Error("Invalid data structure"); }
                 } catch (e) {
                     console.error("Kaydedilmiş veri okunurken hata, başlangıç verileri kullanılıyor:", e);
@@ -363,25 +346,18 @@
                 if (!d.projects) d.projects = [];
                 if (!d.photos) d.photos = [];
             });
-            return false; // Kayıtlı veri bulunamadı.
+            return false;
         }
 
         // --- Otomatik Başlangıç Verisi Yükleme ---
-
-        /**
-         * GitHub repozitoriumundan başlangıç norm ve personel verilerini yükler.
-         * Bu fonksiyon sadece tarayıcı deposunda (localStorage) veri yoksa çağrılır.
-         */
         async function loadInitialSetup() {
             console.log("GitHub üzerinden başlangıç şablonları yükleniyor...");
-
             const templatePaths = [
                 { path: 'templates/bolge_norm.xlsx', type: 'norm' },
                 { path: 'templates/tapu_norm.xlsx', type: 'norm' },
                 { path: 'templates/kadastro_norm.xlsx', type: 'norm' },
                 { path: 'templates/Personel.xlsx', type: 'personnel' }
             ];
-
             const processFile = async (fileInfo) => {
                 try {
                     const fullPath = GITHUB_REPO_BASE_URL + fileInfo.path;
@@ -397,21 +373,17 @@
                     return null;
                 }
             };
-            
             const results = await Promise.all(templatePaths.map(processFile));
             const allNormData = results.filter(r => r && r.type === 'norm').flatMap(r => r.data);
             const allPersonnelData = results.filter(r => r && r.type === 'personnel').flatMap(r => r.data);
-
             if (allNormData.length > 0) {
                 updateNormsFromData(allNormData);
                 console.log("Norm verileri şablonlardan başarıyla yüklendi.");
             }
-            
             if (allPersonnelData.length > 0) {
                 updatePersonnelFromData(allPersonnelData);
                 console.log("Personel listesi şablondan başarıyla yüklendi.");
             }
-
             if (allNormData.length > 0 || allPersonnelData.length > 0) {
                 saveData();
                 console.log("Tüm başlangıç verileri yerel depolamaya kaydedildi.");
@@ -419,7 +391,6 @@
                  console.warn("Şablon dosyaları bulunamadı veya boş. Başlangıç verileriyle devam ediliyor.");
             }
         }
-        
         function updateNormsFromData(data) {
             let updatedCount = 0;
             data.forEach(row => {
@@ -442,7 +413,6 @@
             });
              console.log(`${updatedCount} adet kadro satırı Excel verisinden güncellendi.`);
         }
-
         function updatePersonnelFromData(data) {
             let addedCount = 0;
             data.forEach(row => {
@@ -450,12 +420,9 @@
                 const title = getValueFromRow(row, ['Unvanı', 'Unvani', 'Unvan']);
                 const sicil = getValueFromRow(row, ['Sicil', 'Sicil No']);
                 const birimAdiRaw = getValueFromRow(row, ['Birim Adı', 'Birim_Adi', 'Birim']);
-
                 if (!sicil || !name || !title || !birimAdiRaw) return;
-
                 const normalizedBirimAdi = normalizeString(birimAdiRaw);
                 const targetDir = directorateData.find(d => normalizeString(d.name) === normalizedBirimAdi);
-
                 if (targetDir) {
                     if (!targetDir.personnelList) targetDir.personnelList = [];
                     const newPersonData = { name: String(name).trim(), title: String(title).trim(), sicil: String(sicil).trim() };
@@ -465,11 +432,6 @@
             });
             console.log(`${addedCount} adet personel Excel verisinden eklendi.`);
         }
-
-
-        /**
-         * Uygulamayı başlatan ana fonksiyon. Veriyi yükler ve arayüzü çizer.
-         */
         async function initializeApp() {
             const hasSavedData = loadData();
             if (!hasSavedData) {
@@ -488,15 +450,10 @@
         const card=document.createElement('div');card.className='bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1';card.dataset.id=dir.id;card.innerHTML=`<div class="p-5"><div class="flex justify-between items-start"><h3 class="text-lg font-bold text-gray-900 truncate pr-2">${dir.name}</h3><span class="text-xs font-bold px-2 py-1 rounded-full ${diffClass}"><i class="fas ${diffIcon} mr-1"></i> ${difference>=0?'+':''}${difference}</span></div><div class="mt-4"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold text-gray-500">Doluluk Oranı</span><span class="text-sm font-bold ${progressBarColor.replace('bg','text')}">${occupancyRate}%</span></div><div class="progress-bar-container"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate}%;"></div></div></div></div><div class="px-5 pb-5 flex justify-between items-center text-sm text-gray-600"><span>Norm: <b class="text-gray-900">${totalNorm}</b></span><span>Mevcut: <b class="text-gray-900">${totalCurrent}</b></span></div><div class="bg-gray-50 px-5 py-3 text-right"><span class="text-sm font-medium text-blue-600 hover:text-blue-800">Detayları Gör <i class="fas fa-arrow-right ml-1"></i></span></div>`;card.addEventListener('click',()=>showModal(dir.id));grid.appendChild(card)})}
         function showModal(id){currentDirectorateId=id;const dir=directorateData.find(d=>d.id===id);if(!dir)return;modalTitle.textContent=dir.name;populatePersonnelTable(dir);populatePersonnelList(dir.personnelList||[],dir.id);personnelSearchInput.value='';populateGallery(projectsGallery,dir.projects,'projects');populateGallery(photosGallery,dir.photos,'photos');switchTab('personnel');modal.classList.remove('hidden');document.body.style.overflow='hidden'}
         function populatePersonnelTable(dir){personnelTableBody.innerHTML='';personnelTableBody.dataset.id=dir.id;dir.personnel.forEach((p,index)=>{const difference=(p.current||0)-(p.norm||0);let diffClass='fark-sifir';if(difference>0)diffClass='fark-pozitif';if(difference<0)diffClass='fark-negatif';const row=document.createElement('tr');row.dataset.index=index;row.innerHTML=`<td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.title}</td><td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.norm||0}</div></td><td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.current||0}</div></td><td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-center fark-cell ${diffClass}">${difference>=0?'+':''}${difference}</td>`;personnelTableBody.appendChild(row)})}
-        function populatePersonnelList(list,dirId){personnelListTableBody.innerHTML='';if(!list||list.length===0){personnelListTableBody.innerHTML=`<tr><td colspan="4" class="text-center py-10 text-gray-500">Bu birim için personel bilgisi bulunamadı.<br>Yukarıdaki 'Excel'den Yükle' butonu ile liste ekleyebilirsiniz.</td></tr>`;return}
+        function populatePersonnelList(list,dirId){personnelListTableBody.innerHTML='';if(!list||list.length===0){personnelListTableBody.innerHTML=`<tr><td colspan="3" class="text-center py-10 text-gray-500">Bu birim için personel bilgisi bulunamadı.<br>Merkezi Yönetim Panelinden personel ekleyebilirsiniz.</td></tr>`;return}
         list.forEach((p,index)=>{const row=document.createElement('tr');row.dataset.index=index;row.dataset.dirId=dirId;row.innerHTML=createPersonnelRowView(p);personnelListTableBody.appendChild(row)})}
-        function createPersonnelRowView(p){return` <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-600">${p.title||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button> <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button> </td> `}
-        function createPersonnelRowEdit(p){return` <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td> <td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button> <button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button> </td> `}
-        function handlePersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const index=parseInt(row.dataset.index,10);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;if(action==='edit'){row.innerHTML=createPersonnelRowEdit(dir.personnelList[index])}else if(action==='delete'){if(button.classList.contains('confirm-delete')){dir.personnelList.splice(index,1);saveData();refreshModalViews(dir);refreshAllViews()}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const updatedPerson={};inputs.forEach(input=>{updatedPerson[input.dataset.field]=input.value});if(isNaN(index)){dir.personnelList.push(updatedPerson)}else{dir.personnelList[index]=updatedPerson}
-        saveData();refreshModalViews(dir);refreshAllViews()}else if(action==='cancel'){if(isNaN(index)){row.remove()}else{row.innerHTML=createPersonnelRowView(dir.personnelList[index])}}}
-        function handleExcelImport(event,targetDirId){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e)=>{const data=new Uint8Array(e.target.result);const workbook=XLSX.read(data,{type:'array'});const firstSheetName=workbook.SheetNames[0];const worksheet=workbook.Sheets[firstSheetName];let json=XLSX.utils.sheet_to_json(worksheet,{header:["name","title","sicil"]});if(json.length>0&&json[0].name&&normalizeString(json[0].name).includes('ad')){json.shift()}
-        const dir=directorateData.find(d=>d.id===targetDirId);if(dir){dir.personnelList=json.map(item=>({name:item.name||'',title:item.title||'',sicil:item.sicil||''}));saveData();refreshModalViews(dir);refreshAllViews()}
-        event.target.value=''};reader.readAsArrayBuffer(file)}
+        // GÜNCELLEME: Bu fonksiyon artık sadece okuma amaçlı satır oluşturuyor.
+        function createPersonnelRowView(p){return` <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-600">${p.title||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil||''}</td>`}
         function populateGallery(galleryElement,items,galleryType){galleryElement.innerHTML='';const uploadCard=document.createElement('div');uploadCard.className='upload-card';const acceptTypes=galleryType==='projects'?'image/*,application/pdf':'image/*';uploadCard.innerHTML=`<label for="${galleryType}-upload" class="text-center text-gray-500 cursor-pointer"><i class="fas fa-plus-circle fa-3x"></i><p class="mt-2 font-semibold">${galleryType==='projects'?'Dosya Yükle':'Resim Yükle'}</p></label><input type="file" id="${galleryType}-upload" class="hidden" multiple accept="${acceptTypes}">`;galleryElement.appendChild(uploadCard);document.getElementById(`${galleryType}-upload`).addEventListener('change',handleFileUpload);if(items&&items.length>0){items.forEach((item,index)=>{const galleryItem=document.createElement('div');galleryItem.className='gallery-item';if(item.type&&item.type.startsWith('image/')){galleryItem.innerHTML=`<img src="${item.url}" alt="${item.title}" class="w-full h-48 object-cover rounded-lg border-2 border-gray-200"><div class="delete-btn" data-index="${index}" data-type="${galleryType}"><i class="fas fa-trash-alt"></i></div>`}else if(item.type==='application/pdf'){galleryItem.innerHTML=`<div class="pdf-thumbnail"><i class="fas fa-file-pdf"></i><span>${item.title}</span></div><div class="delete-btn" data-index="${index}" data-type="${galleryType}"><i class="fas fa-trash-alt"></i></div>`}
         galleryItem.addEventListener('click',(e)=>{if(!e.target.closest('.delete-btn')){openLightbox(item)}});galleryElement.appendChild(galleryItem)})}}
         function handleFileUpload(event){const files=event.target.files;if(!files.length)return;const galleryType=event.target.id.includes('projects')?'projects':'photos';const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;for(const file of files){const reader=new FileReader();reader.onload=(e)=>{const newFile={title:file.name,url:e.target.result,type:file.type};if(!dir[galleryType])dir[galleryType]=[];dir[galleryType].push(newFile);saveData();populateGallery(document.getElementById(`${galleryType}-gallery`),dir[galleryType],galleryType)};reader.readAsDataURL(file)}}
@@ -701,10 +658,11 @@
         exportExcelBtn.addEventListener('click',exportToExcel);
         personnelSearchInput.addEventListener('input',(e)=>{const searchTerm=normalizeString(e.target.value);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(dir&&dir.personnelList){const filteredList=dir.personnelList.filter(p=>normalizeString(p.name).includes(searchTerm)||normalizeString(p.title).includes(searchTerm)||(p.sicil&&normalizeString(p.sicil.toString()).includes(searchTerm)));populatePersonnelList(filteredList,dir.id)}});
         exportPersonnelListExcelBtn.addEventListener('click',exportPersonnelListToExcel);
-        importPersonnelExcelBtn.addEventListener('click',()=>importPersonnelExcelInput.click());
-        importPersonnelExcelInput.addEventListener('change',(e)=>handleExcelImport(e,currentDirectorateId));
-        personnelListTableBody.addEventListener('click',handlePersonnelListAction);
-        addPersonnelBtn.addEventListener('click',()=>{const newRow=document.createElement('tr');newRow.innerHTML=createPersonnelRowEdit({});personnelListTableBody.appendChild(newRow)});
+        // GÜNCELLEME: Bu olay dinleyicileri artık kullanılmadığı için kaldırılabilir veya bırakılabilir, zararı yok.
+        // importPersonnelExcelBtn.addEventListener('click',()=>importPersonnelExcelInput.click());
+        // importPersonnelExcelInput.addEventListener('change',(e)=>handleExcelImport(e,currentDirectorateId));
+        // personnelListTableBody.addEventListener('click',handlePersonnelListAction);
+        // addPersonnelBtn.addEventListener('click',()=>{const newRow=document.createElement('tr');newRow.innerHTML=createPersonnelRowEdit({});personnelListTableBody.appendChild(newRow)});
         lightboxCloseBtn.addEventListener('click',closeLightbox);zoomInBtn.addEventListener('click',()=>zoom('in'));zoomOutBtn.addEventListener('click',()=>zoom('out'));
         closeAllPersonnelModalBtn.addEventListener('click',()=>{allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto'});
         allPersonnelModal.addEventListener('click',(e)=>{if(e.target===allPersonnelModal){allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto'}});
