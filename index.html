@@ -1,1017 +1,509 @@
 <!DOCTYPE html>
-
 <html lang="tr">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>TKGM Elazığ Bölge Müdürlüğü - Birim Yönetim Portalı</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-    <style>
-
-        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
-
-        .modal-backdrop { background-color: rgba(0, 0, 0, 0.75); }
-
-        .modal-content { max-height: 90vh; }
-
-        .table-header-sticky th { position: sticky; top: 0; background-color: #1e3a8a; color: white; z-index: 10; }
-
-        .fark-pozitif { background-color: #dcfce7; color: #166534; font-weight: bold; }
-
-        .fark-negatif { background-color: #fee2e2; color: #991b1b; font-weight: bold; }
-
-        .fark-sifir { background-color: #f1f5f9; color: #475569; }
-
-        .nav-active { border-bottom-color: #fbbf24; color: #fbbf24; }
-
-        .group-header { border-bottom: 3px solid #002d72; padding-bottom: 0.5rem; margin-bottom: 1.5rem; color: #002d72; }
-
-        .readonly-cell { background-color: #f8fafc; color: #64748b; font-weight: 500; text-align: center; padding: 0.5rem; }
-
-        .upload-card { display: flex; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; border-radius: 0.5rem; min-height: 12rem; cursor: pointer; transition: all 0.2s ease-in-out; position: relative; }
-
-        .upload-card:hover { border-color: #3b82f6; background-color: #eff6ff; }
-
-        .gallery-item { position: relative; cursor: pointer; }
-
-        .delete-btn { position: absolute; top: 0.5rem; right: 0.5rem; background-color: rgba(0, 0, 0, 0.6); color: white; border-radius: 50%; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity 0.2s; z-index: 5; }
-
-        .gallery-item:hover .delete-btn { opacity: 1; }
-
-        .progress-bar-container { height: 8px; background-color: #e5e7eb; border-radius: 9999px; overflow: hidden; width: 100%; }
-
-        .progress-bar { height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out; }
-
-        .pdf-thumbnail { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 12rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; background-color: #f9fafb; }
-
-        .pdf-thumbnail i { font-size: 3rem; color: #be123c; }
-
-        .pdf-thumbnail span { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; color: #4b5563; word-break: break-all; }
-
-        #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-
-        #lightbox.show { opacity: 1; visibility: visible; }
-
-        #lightbox-content-wrapper { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-
-        #lightbox-content { max-width: 100%; max-height: 100%; display: block; transition: transform 0.2s ease; cursor: grab; }
-
-        #lightbox-content.panning { cursor: grabbing; }
-
-        #lightbox-content-wrapper iframe { width: 100%; height: 100%; background: white; border: none; border-radius: 0.5rem; }
-
-        .lightbox-control { position: absolute; z-index: 1001; background-color: rgba(30, 41, 59, 0.7); color: white; border: none; border-radius: 50%; width: 3rem; height: 3rem; font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; }
-
-        .lightbox-control:hover { background-color: rgba(30, 41, 59, 1); }
-
-        #lightbox-close { top: 1rem; right: 1rem; }
-
-        #lightbox-zoom-controls { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1001; display: flex; gap: 0.5rem; background-color: rgba(30, 41, 59, 0.7); padding: 0.5rem; border-radius: 9999px; }
-
-        #lightbox-zoom-controls button { background: none; border: none; color: white; width: 2.5rem; height: 2.5rem; font-size: 1.2rem; cursor: pointer; }
-
-        .personnel-list-input { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: #f9fafb; }
-
-        .personnel-list-input:focus { outline: 2px solid #3b82f6; border-color: transparent; }
-
-        .action-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; transition: background-color 0.2s; margin: 0 0.25rem; }
-
-        .edit-btn { color: #3b82f6; } .edit-btn:hover { background-color: #eff6ff; }
-
-        .delete-btn-action { color: #ef4444; } .delete-btn-action:hover { background-color: #fee2e2; }
-
-        .save-btn { color: #22c55e; } .save-btn:hover { background-color: #dcfce7; }
-
-        .cancel-btn { color: #6b7280; } .cancel-btn:hover { background-color: #f3f4f6; }
-
-        .confirm-delete { color: white !important; background-color: #ef4444 !important; }
-
-    </style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKGM Elazığ Bölge Müdürlüğü - Birim Yönetim Portalı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.75); }
+        .modal-content { max-height: 90vh; }
+        .table-header-sticky th { position: sticky; top: 0; background-color: #1e3a8a; color: white; z-index: 10; }
+        .fark-pozitif { background-color: #dcfce7; color: #166534; font-weight: bold; }
+        .fark-negatif { background-color: #fee2e2; color: #991b1b; font-weight: bold; }
+        .fark-sifir { background-color: #f1f5f9; color: #475569; }
+        .nav-active { border-bottom-color: #fbbf24; color: #fbbf24; }
+        .group-header { border-bottom: 3px solid #002d72; padding-bottom: 0.5rem; margin-bottom: 1.5rem; color: #002d72; }
+        .readonly-cell { background-color: #f8fafc; color: #64748b; font-weight: 500; text-align: center; padding: 0.5rem; }
+        .upload-card { display: flex; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; border-radius: 0.5rem; min-height: 12rem; cursor: pointer; transition: all 0.2s ease-in-out; position: relative; }
+        .upload-card:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        .gallery-item { position: relative; cursor: pointer; }
+        .delete-btn { position: absolute; top: 0.5rem; right: 0.5rem; background-color: rgba(0, 0, 0, 0.6); color: white; border-radius: 50%; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity 0.2s; z-index: 5; }
+        .gallery-item:hover .delete-btn { opacity: 1; }
+        .progress-bar-container { height: 8px; background-color: #e5e7eb; border-radius: 9999px; overflow: hidden; width: 100%; }
+        .progress-bar { height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out; }
+        .pdf-thumbnail { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 12rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; background-color: #f9fafb; }
+        .pdf-thumbnail i { font-size: 3rem; color: #be123c; }
+        .pdf-thumbnail span { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; color: #4b5563; word-break: break-all; }
+        #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #lightbox.show { opacity: 1; visibility: visible; }
+        #lightbox-content-wrapper { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #lightbox-content { max-width: 100%; max-height: 100%; display: block; transition: transform 0.2s ease; cursor: grab; }
+        #lightbox-content.panning { cursor: grabbing; }
+        #lightbox-content-wrapper iframe { width: 100%; height: 100%; background: white; border: none; border-radius: 0.5rem; }
+        .lightbox-control { position: absolute; z-index: 1001; background-color: rgba(30, 41, 59, 0.7); color: white; border: none; border-radius: 50%; width: 3rem; height: 3rem; font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; }
+        .lightbox-control:hover { background-color: rgba(30, 41, 59, 1); }
+        #lightbox-close { top: 1rem; right: 1rem; }
+        #lightbox-zoom-controls { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1001; display: flex; gap: 0.5rem; background-color: rgba(30, 41, 59, 0.7); padding: 0.5rem; border-radius: 9999px; }
+        #lightbox-zoom-controls button { background: none; border: none; color: white; width: 2.5rem; height: 2.5rem; font-size: 1.2rem; cursor: pointer; }
+        .personnel-list-input { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: #f9fafb; }
+        .personnel-list-input:focus { outline: 2px solid #3b82f6; border-color: transparent; }
+        .action-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; transition: background-color 0.2s; margin: 0 0.25rem; }
+        .edit-btn { color: #3b82f6; } .edit-btn:hover { background-color: #eff6ff; }
+        .delete-btn-action { color: #ef4444; } .delete-btn-action:hover { background-color: #fee2e2; }
+        .save-btn { color: #22c55e; } .save-btn:hover { background-color: #dcfce7; }
+        .cancel-btn { color: #6b7280; } .cancel-btn:hover { background-color: #f3f4f6; }
+        .confirm-delete { color: white !important; background-color: #ef4444 !important; }
+    </style>
 </head>
-
 <body class="antialiased text-gray-800">
 
-
-
-    <header class="bg-white shadow-md sticky top-0 z-40">
-
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-
-            <div class="flex items-center justify-between h-20">
-
-                <div class="flex items-center">
-
-                    <img src="https://placehold.co/100x40/002d72/ffffff?text=TKGM" alt="TKGM Logo" class="h-10">
-
-                    <div class="ml-4">
-
-                        <h1 class="text-xl font-bold text-gray-900">Birim Yönetim Portalı</h1>
-
-                        <p class="text-sm text-gray-500">Elazığ Bölge Müdürlüğü</p>
-
-                    </div>
-
-                </div>
-
-                <div class="flex items-center space-x-4">
-
-                    <span class="text-md font-bold text-blue-900">Tapu ve Kadastro XVI.(Elazığ) Bölge Müdürlüğü</span>
-
-                    <i class="fa-solid fa-star text-yellow-400"></i>
-
-                    <i class="fa-solid fa-star text-blue-800"></i>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </header>
-
-
-
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-
-        <div id="dashboard-container" class="mb-10">
-
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-
-                <h2 class="text-3xl font-bold group-header flex-shrink-0" style="margin-bottom: 0;">Genel Durum Panosu</h2>
-
-                <div id="summary-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full"></div>
-
-            </div>
-
-        </div>
-
-        <div id="bolge-section" class="mb-10">
-
-            <h2 class="text-2xl font-bold group-header">Bölge Müdürlüğü</h2>
-
-            <div id="bolge-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
-
-        </div>
-
-        <div id="kadastro-section" class="mb-10">
-
-            <h2 class="text-2xl font-bold group-header">Kadastro Müdürlükleri</h2>
-
-            <div id="kadastro-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
-
-        </div>
-
-        <div id="elazig-section" class="mb-10">
-
-            <h2 class="text-2xl font-bold group-header">Elazığ Tapu Müdürlükleri</h2>
-
-            <div id="elazig-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
-
-        </div>
-
-        <div id="malatya-section" class="mb-10">
-
-            <h2 class="text-2xl font-bold group-header">Malatya Tapu Müdürlükleri</h2>
-
-            <div id="malatya-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
-
-        </div>
-
-        <div id="bingol-section" class="mb-10">
-
-            <h2 class="text-2xl font-bold group-header">Bingöl Tapu Müdürlükleri</h2>
-
-            <div id="bingol-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
-
-        </div>
-
-        <div id="tunceli-section" class="mb-10">
-
-            <h2 class="text-2xl font-bold group-header">Tunceli Tapu Müdürlükleri</h2>
-
-            <div id="tunceli-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
-
-        </div>
-
-    </main>
-
-
-
-    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div id="modal-content" class="bg-white rounded-lg shadow-2xl w-full max-w-6xl flex flex-col modal-content"><div class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg"><h3 id="modal-title" class="text-2xl font-bold text-gray-900"></h3><button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-2x"></i></button></div><div class="flex-grow p-6 overflow-y-auto"><div class="border-b border-gray-200 mb-6"><nav id="modal-tabs" class="-mb-px flex space-x-8" aria-label="Tabs"><button data-tab="personnel" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-users mr-2"></i>Personel Durumu</button><button data-tab="personnel-list" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-address-book mr-2"></i>Personel Listesi</button><button data-tab="projects" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-drafting-compass mr-2"></i>Mimari Projeler</button><button data-tab="photos" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-camera-retro mr-2"></i>Oda Resimleri</button></nav></div><div id="tab-content"><div id="personnel-content" class="tab-pane"><div class="flex justify-end mb-4"><button id="export-excel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-excel mr-2"></i>Excel'e Aktar</button></div><div class="overflow-x-auto rounded-lg border"><table class="min-w-full divide-y divide-gray-200"><thead class="table-header-sticky"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvan</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Norm</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Mevcut</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Fark</th></tr></thead><tbody id="personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div><div id="personnel-list-content" class="tab-pane hidden"><div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4"><div class="relative w-full sm:w-auto flex-grow"><input type="text" id="personnel-search-input" placeholder="Personel ara..." class="w-full pl-10 pr-4 py-2 border rounded-full"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div></div><div class="flex items-center gap-2"><input type="file" id="import-personnel-excel-input" class="hidden" accept=".xlsx, .xls"><button id="import-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-import mr-2"></i>Excel'den Yükle</button><button id="export-personnel-list-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-export mr-2"></i>Listeyi Dışa Aktar</button></div></div><div class="overflow-auto rounded-lg border" style="max-height: 55vh;"><table class="min-w-full divide-y divide-gray-200"><thead class="table-header-sticky"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider w-32">İşlemler</th></tr></thead><tbody id="personnel-list-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div><div class="mt-4 flex justify-end"><button id="add-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button></div></div><div id="projects-content" class="tab-pane hidden"><div id="projects-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div><div id="photos-content" class="tab-pane hidden"><div id="photos-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div></div></div></div></div>
-
-    
-
-    <div id="all-personnel-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
-
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-7xl flex flex-col modal-content">
-
-            <div id="all-personnel-modal-header" class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-
-                <h3 id="all-personnel-modal-title" class="text-2xl font-bold text-gray-900 flex items-center gap-3"><i class="fas fa-users-cog text-blue-800"></i> Merkezi Yönetim Paneli</h3>
-
-                <button id="close-all-personnel-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-2x"></i></button>
-
-            </div>
-
-            <div class="flex-grow p-6 overflow-y-auto">
-
-                <div class="border-b border-gray-200 mb-6">
-
-                    <nav id="central-modal-tabs" class="-mb-px flex space-x-8" aria-label="Tabs">
-
-                        <button data-tab="central-personnel-list" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg">
-
-                            <i class="fas fa-users mr-2"></i>Personel Listesi
-
-                        </button>
-
-                        <button data-tab="central-norm-management" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg">
-
-                            <i class="fas fa-sitemap mr-2"></i>Toplu Norm Yönetimi
-
-                        </button>
-
-                    </nav>
-
-                </div>
-
-                
-
-                <div id="central-tab-content">
-
-                    <div id="central-personnel-list-content" class="central-tab-pane">
-
-                        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-
-                            <div class="relative w-full sm:w-auto flex-grow">
-
-                                <input type="text" id="all-personnel-search-input" placeholder="Personel veya Birim Ara..." class="w-full pl-10 pr-4 py-2 border rounded-full">
-
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
-
-                            </div>
-
-                            <div class="flex items-center gap-2 flex-wrap justify-end">
-
-                                <button id="bulk-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-trash-alt mr-2"></i>Seçilenleri Sil (<span id="bulk-delete-count">0</span>)</button>
-
-                                <input type="file" id="import-all-personnel-excel-input" class="hidden" accept=".xlsx, .xls">
-
-                                <button id="import-all-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-import mr-2"></i>Yükle/Güncelle</button>
-
-                                <button id="export-all-personnel-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-export mr-2"></i>Tüm Listeyi Aktar</button>
-
-                            </div>
-
-                        </div>
-
-                        <div class="overflow-auto rounded-lg border" style="max-height: 60vh;">
-
-                            <table class="min-w-full divide-y divide-gray-200">
-
-                                <thead class="table-header-sticky">
-
-                                    <tr>
-
-                                        <th scope="col" class="px-4 py-3 w-4"><input type="checkbox" id="select-all-personnel-checkbox"></th>
-
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th>
-
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th>
-
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th>
-
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Birim</th>
-
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider w-32">İşlemler</th>
-
-                                    </tr>
-
-                                </thead>
-
-                                <tbody id="all-personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody>
-
-                            </table>
-
-                        </div>
-
-                        <div class="mt-4 flex justify-end">
-
-                            <button id="add-all-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div id="central-norm-management-content" class="central-tab-pane hidden">
-
-                         <div class="space-y-6">
-
-                             <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-
-                                 <p class="font-semibold text-blue-800"><i class="fas fa-info-circle mr-2"></i>Nasıl Çalışır?</p>
-
-                                 <p class="text-sm text-blue-700 mt-1">
-
-                                     İlgili grup için şablonu indirin. Şablonda mevcut durum referans olarak yer alır. Güncelleme yapmak için **'Norm_Sayisi' ve 'Mevcut_Sayisi' sütunlarını** değiştirip dosyayı kaydedin ve ilgili 'Excel Yükle' butonu ile sisteme yükleyin. 'Fark' sütunu Excel'de otomatik hesaplanır.
-
-                                 </p>
-
-                             </div>
-
-                            
-
-                             <div class="border rounded-lg p-4">
-
-                                 <h4 class="font-semibold text-lg text-gray-700 mb-3">Bölge Müdürlüğü</h4>
-
-                                 <div class="flex flex-col sm:flex-row gap-4">
-
-                                     <button data-group="bolge" class="norm-template-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-download"></i><span>Şablonu İndir</span></button>
-
-                                     <button data-group="bolge" class="norm-upload-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-upload"></i><span>Excel Yükle</span></button>
-
-                                 </div>
-
-                             </div>
-
-                             <div class="border rounded-lg p-4">
-
-                                 <h4 class="font-semibold text-lg text-gray-700 mb-3">Tapu Müdürlükleri</h4>
-
-                                 <div class="flex flex-col sm:flex-row gap-4">
-
-                                     <button data-group="tapu" class="norm-template-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-download"></i><span>Şablonu İndir</span></button>
-
-                                     <button data-group="tapu" class="norm-upload-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-upload"></i><span>Excel Yükle</span></button>
-
-                                 </div>
-
-                             </div>
-
-                             <div class="border rounded-lg p-4">
-
-                                 <h4 class="font-semibold text-lg text-gray-700 mb-3">Kadastro Müdürlükleri</h4>
-
-                                 <div class="flex flex-col sm:flex-row gap-4">
-
-                                     <button data-group="kadastro" class="norm-template-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-download"></i><span>Şablonu İndir</span></button>
-
-                                     <button data-group="kadastro" class="norm-upload-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-upload"></i><span>Excel Yükle</span></button>
-
-                                 </div>
-
-                             </div>
-
-                             <input type="file" id="norm-excel-input" class="hidden" accept=".xlsx, .xls">
-
-                             <div id="norm-upload-report" class="hidden p-4 bg-gray-100 rounded-lg text-sm"></div>
-
-                         </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    
-
-    <div id="lightbox"><div id="lightbox-content-wrapper"></div><button id="lightbox-close" class="lightbox-control"><i class="fas fa-times"></i></button><div id="lightbox-zoom-controls"><button id="zoom-in" class="lightbox-control" style="position: static;"><i class="fas fa-plus"></i></button><button id="zoom-out" class="lightbox-control" style="position: static;"><i class="fas fa-minus"></i></button></div></div>
-
-
-
-    <script>
-
-        // --- Global Değişkenler ve Veri Paketi ---
-
-        let directorateData = [];
-
-        let currentDirectorateId = null;
-
-        let currentZoom = 1, isPanning = false, startX, startY, translateX, translateY;
-
-        let currentNormUploadGroup = '';
-
-        const initialData = [ { id: 'bolge_md', name: 'BÖLGE MÜDÜRLÜĞÜ', group: 'bolge', personnel: [ { title: 'Bölge Müdürü', norm: 1, current: 1 }, { title: 'Bölge Müdür Yrd.', norm: 2, current: 2 }, { title: 'Şube Müdürü', norm: 5, current: 5 }, { title: 'Mühendis', norm: 2, current: 0 }, { title: 'Avukat', norm: 1, current: 0 }, { title: 'İşlem Yapan Personel', norm: 14, current: 22 }, { title: 'Programcı', norm: 1, current: 0 }, { title: 'Arşiv Görevlisi', norm: 1, current: 1 }, { title: 'Şoför', norm: 7, current: 7 }, { title: 'Güvenlik Personeli', norm: 0, current: 3 }, { title: 'Destek Personeli', norm: 3, current: 8 } ], personnelList: [], projects: [], photos: [] }, { id: 'elazig_km', name: 'ELAZIĞ KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 11, current: 13 }, { title: 'Teknisyen/Tekniker', norm: 23, current: 33 }, { title: 'İşlem Yapan Personel', norm: 3, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 5, current: 6 }, { title: 'Şoför', norm: 1, current: 1 }, { title: 'Güvenlik Personeli', norm: 0, current: 0 } ], personnelList: [], projects: [], photos: [] }, { id: 'malatya_km', name: 'MALATYA KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 2, current: 2 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 15, current: 4 }, { title: 'Teknisyen/Tekniker', norm: 28, current: 36 }, { title: 'İşlem Yapan Personel', norm: 3, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 6, current: 4 }, { title: 'Şoför', norm: 2, current: 1 }, { title: 'Güvenlik Personeli', norm: 1, current: 6 } ], personnelList: [], projects: [], photos: [] }, { id: 'bingol_km', name: 'BİNGÖL KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 4, current: 8 }, { title: 'Teknisyen/Tekniker', norm: 11, current: 12 }, { title: 'İşlem Yapan Personel', norm: 1, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 3, current: 4 }, { title: 'Şoför', norm: 1, current: 1 }, { title: 'Güvenlik Personeli', norm: 5, current: 5 } ], personnelList: [], projects: [], photos: [] }, { id: 'tunceli_km', name: 'TUNCELİ KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 3, current: 8 }, { title: 'Teknisyen/Tekniker', norm: 5, current: 17 }, { title: 'İşlem Yapan Personel', norm: 1, current: 0 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 3, current: 2 }, { title: 'Şoför', norm: 1, current: 0 }, { title: 'Güvenlik Personeli', norm: 1, current: 0 } ], personnelList: [], projects: [], photos: [] }, { id: 'elazig_tm', name: 'ELAZIĞ TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 7, current: 6 }, { title: 'İşlem Yapan Personel', norm: 40, current: 39 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 4, current: 3 }], personnelList: [], projects: [], photos: [] }, { id: 'agin_tm', name: 'AĞIN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'alacakaya_tm', name: 'ALACAKAYA TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'aricak_tm', name: 'ARICAK TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'baskil_tm', name: 'BASKİL TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'karakocan_tm', name: 'KARAKOÇAN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 4 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'keban_tm', name: 'KEBAN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kovancilar_tm', name: 'KOVANCILAR TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 6 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'maden_tm', name: 'MADEN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'palu_tm', name: 'PALU TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'sivrice_tm', name: 'SİVRİCE TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'battalgazi_tm', name: 'BATTALGAZİ TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 3, current: 3 }, { title: 'İşlem Yapan Personel', norm: 17, current: 23 }, { title: 'Arşiv Görevlisi', norm: 2, current: 1 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'yesilyurt_tm', name: 'YEŞİLYURT TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 3, current: 3 }, { title: 'İşlem Yapan Personel', norm: 19, current: 23 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 2, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'akcadag_tm', name: 'AKÇADAĞ TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 7 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'arapgir_tm', name: 'ARAPGİR TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'arguvan_tm', name: 'ARGUVAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'darende_tm', name: 'DARENDE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 4 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'dogansehir_tm', name: 'DOĞANŞEHİR TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 5 }, { title: 'Arşiv Görevlisi', norm: 2, current: 1 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'doganyol_tm', name: 'DOĞANYOL TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'hekimhan_tm', name: 'HEKİMHAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'kale_tm', name: 'KALE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kuluncak_tm', name: 'KULUNCAK TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'puturge_tm', name: 'PÜTÜRGE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'yazihan_tm', name: 'YAZIHAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'tunceli_tm', name: 'TUNCELİ TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 7 }, { title: 'Arşiv Görevlisi', norm: 3, current: 0 }, { title: 'Destek Personeli', norm: 2, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'cemisgezek_tm', name: 'ÇEMİŞGEZEK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'hozat_tm', name: 'HOZAT TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'mazgirt_tm', name: 'MAZGİRT TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'nazimiye_tm', name: 'NAZİMİYE TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'ovacik_tm', name: 'OVACIK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'pertek_tm', name: 'PERTEK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 4 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'pulumur_tm', name: 'PÜLÜMÜR TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 1 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'bingol_tm', name: 'BİNGÖL TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 2, current: 1 }, { title: 'İşlem Yapan Personel', norm: 12, current: 13 }, { title: 'Arşiv Görevlisi', norm: 1, current: 1 }, { title: 'Destek Personeli', norm: 2, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'adakli_tm', name: 'ADAKLI TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'genc_tm', name: 'GENÇ TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'karliova_tm', name: 'KARLIOVA TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 3 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kigi_tm', name: 'KİĞI TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'solhan_tm', name: 'SOLHAN TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'yayladere_tm', name: 'YAYLADERE TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 1, current: 1 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'yedisu_tm', name: 'YEDİSU TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }];
-
-        
-
-        // --- DOM Elements ---
-
-        const modal = document.getElementById('detail-modal');
-
-        const modalTitle = document.getElementById('modal-title');
-
-        const closeModalBtn = document.getElementById('close-modal-btn');
-
-        const personnelTableBody = document.getElementById('personnel-table-body');
-
-        const projectsGallery = document.getElementById('projects-gallery');
-
-        const photosGallery = document.getElementById('photos-gallery');
-
-        const modalTabs = document.getElementById('modal-tabs');
-
-        const tabPanes = document.querySelectorAll('.tab-pane');
-
-        const exportExcelBtn = document.getElementById('export-excel-btn');
-
-        const personnelListTableBody = document.getElementById('personnel-list-table-body');
-
-        const personnelSearchInput = document.getElementById('personnel-search-input');
-
-        const exportPersonnelListExcelBtn = document.getElementById('export-personnel-list-excel-btn');
-
-        const importPersonnelExcelBtn = document.getElementById('import-personnel-excel-btn');
-
-        const importPersonnelExcelInput = document.getElementById('import-personnel-excel-input');
-
-        const addPersonnelBtn = document.getElementById('add-personnel-btn');
-
-        const lightbox = document.getElementById('lightbox');
-
-        const lightboxContentWrapper = document.getElementById('lightbox-content-wrapper');
-
-        const lightboxCloseBtn = document.getElementById('lightbox-close');
-
-        const zoomInBtn = document.getElementById('zoom-in');
-
-        const zoomOutBtn = document.getElementById('zoom-out');
-
-        const zoomControls = document.getElementById('lightbox-zoom-controls');
-
-        const allPersonnelModal = document.getElementById('all-personnel-modal');
-
-        const closeAllPersonnelModalBtn = document.getElementById('close-all-personnel-modal-btn');
-
-        const allPersonnelTableBody = document.getElementById('all-personnel-table-body');
-
-        const allPersonnelSearchInput = document.getElementById('all-personnel-search-input');
-
-        const addAllPersonnelBtn = document.getElementById('add-all-personnel-btn');
-
-        const exportAllPersonnelExcelBtn = document.getElementById('export-all-personnel-excel-btn');
-
-        const importAllPersonnelExcelBtn = document.getElementById('import-all-personnel-excel-btn');
-
-        const importAllPersonnelExcelInput = document.getElementById('import-all-personnel-excel-input');
-
-        const centralModalTabs = document.getElementById('central-modal-tabs');
-
-        const centralTabPanes = document.querySelectorAll('.central-tab-pane');
-
-        const normTemplateButtons = document.querySelectorAll('.norm-template-btn');
-
-        const normUploadButtons = document.querySelectorAll('.norm-upload-btn');
-
-        const normExcelInput = document.getElementById('norm-excel-input');
-
-        const normUploadReport = document.getElementById('norm-upload-report');
-
-        // YENİ: Toplu silme elementleri
-
-        const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
-
-        const bulkDeleteCount = document.getElementById('bulk-delete-count');
-
-        const selectAllPersonnelCheckbox = document.getElementById('select-all-personnel-checkbox');
-
-
-
-        // --- Veri Yönetimi ve Yardımcı Fonksiyonlar ---
-
-        function normalizeString(str) { if (typeof str !== 'string') return ''; return str.trim().replace(/\s+/g, ' ').toLocaleLowerCase('tr-TR'); }
-
-        function getValueFromRow(row, possibleKeys) { const normalizedRowKeys = Object.keys(row).map(key => ({ original: key, normalized: normalizeString(key) })); for (const possibleKey of possibleKeys) { const normalizedPossibleKey = normalizeString(possibleKey); const foundKey = normalizedRowKeys.find(rk => rk.normalized === normalizedPossibleKey); if (foundKey) { return row[foundKey.original]; } } return undefined; }
-
-        function saveData() { try { localStorage.setItem('tkgmPortalData', JSON.stringify(directorateData)); } catch (e) { console.error("Veri kaydedilirken hata oluştu:", e); alert("Veriler kaydedilemedi. Tarayıcı depolama alanı dolu olabilir."); } }
-
-        function loadData() { const savedData = localStorage.getItem('tkgmPortalData'); if (savedData) { try { const parsedData = JSON.parse(savedData); if (Array.isArray(parsedData) && parsedData.every(item => 'id' in item && 'name' in item)) { directorateData = parsedData; } else { throw new Error("Invalid data structure"); } } catch (e) { console.error("Kaydedilmiş veri okunurken hata, başlangıç verileri kullanılıyor:", e); directorateData = JSON.parse(JSON.stringify(initialData)); } } else { directorateData = JSON.parse(JSON.stringify(initialData)); } directorateData.forEach(d => { if (!d.personnelList) d.personnelList = []; if (!d.projects) d.projects = []; if (!d.photos) d.photos = []; }); }
-
-        
-
-        // --- UI Fonksiyonları ---
-
-        function getAggregatedPersonnel() { let allPersonnel = []; directorateData.forEach(dir => { if (dir.personnelList && Array.isArray(dir.personnelList)) { dir.personnelList.forEach((p, index) => { allPersonnel.push({ ...p, directorateName: dir.name, directorateId: dir.id, originalIndex: index }); }); } }); return allPersonnel; }
-
-        function createGrandTotalCard(stats) { const { norm, current, unitCount } = stats; const difference = current - norm; const occupancyRate = norm > 0 ? Math.round((current / norm) * 100) : (current > 0 ? 100 : 0); let progressBarColor = 'bg-red-500'; if (occupancyRate >= 100) progressBarColor = 'bg-green-500'; else if (occupancyRate >= 90) progressBarColor = 'bg-yellow-400'; let diffClass = 'text-slate-700'; let diffBgClass = 'bg-slate-200'; if (difference > 0) { diffClass = 'text-green-800'; diffBgClass = 'bg-green-100'; } else if (difference < 0) { diffClass = 'text-red-800'; diffBgClass = 'bg-red-100'; } const card = document.createElement('div'); card.className = 'xl:col-span-2 bg-blue-50 rounded-lg shadow-lg p-4 flex flex-col justify-between border-l-8 border-blue-700'; card.innerHTML = `<div><div class="flex justify-between items-start"><div><p class="text-base font-bold text-blue-800">BÖLGE GENEL TOPLAM</p><p class="text-xs text-gray-500">${unitCount} Birim</p></div><div class="w-12 h-12 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-md"><i class="fas fa-bullseye fa-lg"></i></div></div><div class="mt-4"><div class="flex justify-between items-center mb-1"><span class="text-sm font-semibold text-gray-600">Genel Doluluk Oranı</span><span class="text-xl font-bold text-blue-800">${occupancyRate}%</span></div><div class="progress-bar-container bg-blue-100"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate > 100 ? 100 : occupancyRate}%;"></div></div></div></div><div class="mt-4 pt-4 border-t-2 border-blue-200 flex justify-between items-center text-base"><div><span class="text-gray-600">Norm:</span> <b class="text-gray-900 text-2xl">${norm}</b></div><div><span class="text-gray-600">Mevcut:</span> <b class="text-gray-900 text-2xl">${current}</b></div><div class="px-3 py-1 rounded-full ${diffBgClass} ${diffClass}"><b class="text-lg">${difference >= 0 ? '+' : ''}${difference}</b></div></div>`; return card; }
-
-        function createSummaryCard(title, iconClass, stats) { const { norm, current, unitCount } = stats; const difference = current - norm; const occupancyRate = norm > 0 ? Math.round((current / norm) * 100) : (current > 0 ? 100 : 0); let progressBarColor = 'bg-red-500'; if (occupancyRate >= 100) progressBarColor = 'bg-green-500'; else if (occupancyRate >= 90) progressBarColor = 'bg-yellow-400'; let diffClass = 'fark-sifir'; if (difference > 0) diffClass = 'bg-green-200 text-green-800'; else if (difference < 0) diffClass = 'bg-red-200 text-red-800'; const card = document.createElement('div'); card.className = 'bg-white rounded-lg shadow p-4 flex flex-col justify-between'; card.innerHTML = `<div><div class="flex justify-between items-start"><div><p class="text-sm font-semibold text-gray-500">${title}</p><p class="text-xs text-gray-400">${unitCount} Birim</p></div><div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas ${iconClass}"></i></div></div><div class="mt-3"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold text-gray-500">Doluluk Oranı</span><span class="text-sm font-bold ${progressBarColor.replace('bg', 'text')}">${occupancyRate}%</span></div><div class="progress-bar-container"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate > 100 ? 100 : occupancyRate}%;"></div></div></div></div><div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center text-sm"><div><span class="text-gray-500">Norm:</span><b class="text-gray-800">${norm}</b></div><div><span class="text-gray-500">Mevcut:</span><b class="text-gray-800">${current}</b></div><div class="px-2 py-0.5 rounded-full ${diffClass} text-xs"><b>${difference >= 0 ? '+' : ''}${difference}</b></div></div>`; return card; }
-
-        function createPersonnelManagementCard(stats) { const { totalInLists } = stats; const card = document.createElement('div'); card.className = `xl:col-span-2 bg-white rounded-lg shadow p-4 flex flex-col justify-between cursor-pointer hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1`; card.innerHTML = `<div><div class="flex justify-between items-start"><div><p class="text-sm font-semibold text-gray-500">Merkezi Yönetim</p><p class="text-xs text-gray-400">Personel & Norm</p></div><div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas fa-users-cog"></i></div></div><div class="mt-4 text-center"><p class="text-3xl font-bold text-gray-800">${totalInLists}</p><p class="text-sm text-gray-500">Kayıtlı Personel</p></div></div><div class="mt-3 pt-3 border-t border-gray-100 text-center"><span class="text-sm font-medium text-blue-600 hover:text-blue-800">Yönetim Panelini Aç <i class="fas fa-arrow-right ml-1"></i></span></div>`; card.addEventListener('click', () => { switchCentralTab('central-personnel-list'); populateAllPersonnelTable(); allPersonnelModal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }); return card; }
-
-        function renderSummaryDashboard() { if (!directorateData || directorateData.length === 0) return; const summaryContainer = document.getElementById('summary-dashboard'); summaryContainer.innerHTML = ''; const grandTotalNorm = directorateData.reduce((sum, dir) => sum + dir.personnel.reduce((s, p) => s + (p.norm || 0), 0), 0); const grandTotalCurrent = directorateData.reduce((sum, dir) => sum + dir.personnel.reduce((s, p) => s + (p.current || 0), 0), 0); const totalUnitCount = directorateData.length; summaryContainer.appendChild(createGrandTotalCard({ norm: grandTotalNorm, current: grandTotalCurrent, unitCount: totalUnitCount })); const tapuMuds = directorateData.filter(d => ['elazig', 'malatya', 'bingol', 'tunceli'].includes(d.group)); const kadastroMuds = directorateData.filter(d => d.group === 'kadastro'); const bolgeMuds = directorateData.filter(d => d.group === 'bolge'); const calculateTotals = (list) => list.reduce((acc, curr) => { const norm = curr.personnel.reduce((sum, p) => sum + (p.norm || 0), 0); const current = curr.personnel.reduce((sum, p) => sum + (p.current || 0), 0); acc.norm += norm; acc.current += current; return acc; }, { norm: 0, current: 0 }); summaryContainer.appendChild(createSummaryCard('Tapu Müdürlükleri', 'fa-building', { ...calculateTotals(tapuMuds), unitCount: tapuMuds.length })); summaryContainer.appendChild(createSummaryCard('Kadastro Müdürlükleri', 'fa-map-marked-alt', { ...calculateTotals(kadastroMuds), unitCount: kadastroMuds.length })); summaryContainer.appendChild(createSummaryCard('Bölge Müdürlüğü', 'fa-landmark', { ...calculateTotals(bolgeMuds), unitCount: bolgeMuds.length })); const totalInLists = getAggregatedPersonnel().length; summaryContainer.appendChild(createPersonnelManagementCard({ totalInLists })); }
-
-        function renderAllCards(){if(!directorateData||directorateData.length===0)return;document.querySelectorAll('[id$="-grid"]').forEach(grid=>grid.innerHTML='');directorateData.forEach(dir=>{const grid=document.getElementById(`${dir.group}-grid`);if(!grid)return;const totalNorm=dir.personnel.reduce((sum,p)=>sum+(p.norm||0),0);const totalCurrent=dir.personnel.reduce((sum,p)=>sum+(p.current||0),0);const difference=totalCurrent-totalNorm;const occupancyRate=totalNorm>0?Math.round((totalCurrent/totalNorm)*100):(totalCurrent>0?100:0);let progressBarColor='bg-red-500';if(occupancyRate>=90)progressBarColor='bg-green-500';else if(occupancyRate>=70)progressBarColor='bg-yellow-400';let diffClass='fark-sifir';let diffIcon='fa-minus';if(difference>0){diffClass='bg-green-200 text-green-800';diffIcon='fa-arrow-up'}else if(difference<0){diffClass='bg-red-200 text-red-800';diffIcon='fa-arrow-down'}
-
-        const card=document.createElement('div');card.className='bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1';card.dataset.id=dir.id;card.innerHTML=`<div class="p-5"><div class="flex justify-between items-start"><h3 class="text-lg font-bold text-gray-900 truncate pr-2">${dir.name}</h3><span class="text-xs font-bold px-2 py-1 rounded-full ${diffClass}"><i class="fas ${diffIcon} mr-1"></i> ${difference>=0?'+':''}${difference}</span></div><div class="mt-4"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold text-gray-500">Doluluk Oranı</span><span class="text-sm font-bold ${progressBarColor.replace('bg','text')}">${occupancyRate}%</span></div><div class="progress-bar-container"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate}%;"></div></div></div></div><div class="px-5 pb-5 flex justify-between items-center text-sm text-gray-600"><span>Norm: <b class="text-gray-900">${totalNorm}</b></span><span>Mevcut: <b class="text-gray-900">${totalCurrent}</b></span></div><div class="bg-gray-50 px-5 py-3 text-right"><span class="text-sm font-medium text-blue-600 hover:text-blue-800">Detayları Gör <i class="fas fa-arrow-right ml-1"></i></span></div>`;card.addEventListener('click',()=>showModal(dir.id));grid.appendChild(card)})}
-
-        function showModal(id){currentDirectorateId=id;const dir=directorateData.find(d=>d.id===id);if(!dir)return;modalTitle.textContent=dir.name;populatePersonnelTable(dir);populatePersonnelList(dir.personnelList||[],dir.id);personnelSearchInput.value='';populateGallery(projectsGallery,dir.projects,'projects');populateGallery(photosGallery,dir.photos,'photos');switchTab('personnel');modal.classList.remove('hidden');document.body.style.overflow='hidden'}
-
-        function populatePersonnelTable(dir){personnelTableBody.innerHTML='';personnelTableBody.dataset.id=dir.id;dir.personnel.forEach((p,index)=>{const difference=(p.current||0)-(p.norm||0);let diffClass='fark-sifir';if(difference>0)diffClass='fark-pozitif';if(difference<0)diffClass='fark-negatif';const row=document.createElement('tr');row.dataset.index=index;row.innerHTML=`<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.title}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.norm||0}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.current||0}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm text-center fark-cell ${diffClass}">${difference>=0?'+':''}${difference}</td>`;personnelTableBody.appendChild(row)})}
-
-        function populatePersonnelList(list,dirId){personnelListTableBody.innerHTML='';if(!list||list.length===0){personnelListTableBody.innerHTML=`<tr><td colspan="4" class="text-center py-10 text-gray-500">Bu birim için personel bilgisi bulunamadı.<br>Yukarıdaki 'Excel'den Yükle' butonu ile liste ekleyebilirsiniz.</td></tr>`;return}
-
-        list.forEach((p,index)=>{const row=document.createElement('tr');row.dataset.index=index;row.dataset.dirId=dirId;row.innerHTML=createPersonnelRowView(p);personnelListTableBody.appendChild(row)})}
-
-        function createPersonnelRowView(p){return` <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name||''}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.title||''}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil||''}</td> <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button> <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button> </td> `}
-
-        function createPersonnelRowEdit(p){return` <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td> <td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button> <button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button> </td> `}
-
-        function handlePersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const index=parseInt(row.dataset.index,10);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;if(action==='edit'){row.innerHTML=createPersonnelRowEdit(dir.personnelList[index])}else if(action==='delete'){if(button.classList.contains('confirm-delete')){dir.personnelList.splice(index,1);saveData();refreshModalViews(dir);refreshAllViews()}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const updatedPerson={};inputs.forEach(input=>{updatedPerson[input.dataset.field]=input.value});if(isNaN(index)){dir.personnelList.push(updatedPerson)}else{dir.personnelList[index]=updatedPerson}
-
-        saveData();refreshModalViews(dir);refreshAllViews()}else if(action==='cancel'){if(isNaN(index)){row.remove()}else{row.innerHTML=createPersonnelRowView(dir.personnelList[index])}}}
-
-        function handleExcelImport(event,targetDirId){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e)=>{const data=new Uint8Array(e.target.result);const workbook=XLSX.read(data,{type:'array'});const firstSheetName=workbook.SheetNames[0];const worksheet=workbook.Sheets[firstSheetName];let json=XLSX.utils.sheet_to_json(worksheet,{header:["name","title","sicil"]});if(json.length>0&&json[0].name&&normalizeString(json[0].name).includes('ad')){json.shift()}
-
-        const dir=directorateData.find(d=>d.id===targetDirId);if(dir){dir.personnelList=json.map(item=>({name:item.name||'',title:item.title||'',sicil:item.sicil||''}));saveData();refreshModalViews(dir);refreshAllViews()}
-
-        event.target.value=''};reader.readAsArrayBuffer(file)}
-
-        function populateGallery(galleryElement,items,galleryType){galleryElement.innerHTML='';const uploadCard=document.createElement('div');uploadCard.className='upload-card';const acceptTypes=galleryType==='projects'?'image/*,application/pdf':'image/*';uploadCard.innerHTML=`<label for="${galleryType}-upload" class="text-center text-gray-500 cursor-pointer"><i class="fas fa-plus-circle fa-3x"></i><p class="mt-2 font-semibold">${galleryType==='projects'?'Dosya Yükle':'Resim Yükle'}</p></label><input type="file" id="${galleryType}-upload" class="hidden" multiple accept="${acceptTypes}">`;galleryElement.appendChild(uploadCard);document.getElementById(`${galleryType}-upload`).addEventListener('change',handleFileUpload);if(items&&items.length>0){items.forEach((item,index)=>{const galleryItem=document.createElement('div');galleryItem.className='gallery-item';if(item.type&&item.type.startsWith('image/')){galleryItem.innerHTML=`<img src="${item.url}" alt="${item.title}" class="w-full h-48 object-cover rounded-lg border-2 border-gray-200"><div class="delete-btn" data-index="${index}" data-type="${galleryType}"><i class="fas fa-trash-alt"></i></div>`}else if(item.type==='application/pdf'){galleryItem.innerHTML=`<div class="pdf-thumbnail"><i class="fas fa-file-pdf"></i><span>${item.title}</span></div><div class="delete-btn" data-index="${index}" data-type="${galleryType}"><i class="fas fa-trash-alt"></i></div>`}
-
-        galleryItem.addEventListener('click',(e)=>{if(!e.target.closest('.delete-btn')){openLightbox(item)}});galleryElement.appendChild(galleryItem)})}}
-
-        function handleFileUpload(event){const files=event.target.files;if(!files.length)return;const galleryType=event.target.id.includes('projects')?'projects':'photos';const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;for(const file of files){const reader=new FileReader();reader.onload=(e)=>{const newFile={title:file.name,url:e.target.result,type:file.type};if(!dir[galleryType])dir[galleryType]=[];dir[galleryType].push(newFile);saveData();populateGallery(document.getElementById(`${galleryType}-gallery`),dir[galleryType],galleryType)};reader.readAsDataURL(file)}}
-
-        function handleDeleteFile(event){event.stopPropagation();if(!confirm("Bu dosyayı silmek istediğinizden emin misiniz?"))return;const button=event.currentTarget;const index=parseInt(button.dataset.index,10);const galleryType=button.dataset.type;const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir||!dir[galleryType])return;dir[galleryType].splice(index,1);saveData();populateGallery(document.getElementById(`${galleryType}-gallery`),dir[galleryType],galleryType)}
-
-        function openLightbox(item){lightboxContentWrapper.innerHTML='';resetZoomAndPan();if(item.type.startsWith('image/')){const img=document.createElement('img');img.id='lightbox-content';img.src=item.url;lightboxContentWrapper.appendChild(img);zoomControls.style.display='flex';addPanAndZoomListeners(img)}else if(item.type==='application/pdf'){const iframe=document.createElement('iframe');iframe.src=item.url;iframe.className='w-full h-full';lightboxContentWrapper.appendChild(iframe);zoomControls.style.display='none'}
-
-        lightbox.classList.add('show');document.body.style.overflow='hidden'}
-
-        function closeLightbox(){lightbox.classList.remove('show');document.body.style.overflow='auto';removePanAndZoomListeners()}
-
-        function resetZoomAndPan(){currentZoom=1;isPanning=false;translateX=0;translateY=0}
-
-        function addPanAndZoomListeners(element){element.addEventListener('mousedown',startPan);element.addEventListener('mousemove',pan);element.addEventListener('mouseup',endPan);element.addEventListener('mouseleave',endPan);element.addEventListener('wheel',handleWheelZoom)}
-
-        function removePanAndZoomListeners(){const element=document.getElementById('lightbox-content');if(element){element.removeEventListener('mousedown',startPan);element.removeEventListener('mousemove',pan);element.removeEventListener('mouseup',endPan);element.removeEventListener('mouseleave',endPan);element.removeEventListener('wheel',handleWheelZoom)}}
-
-        function applyZoomAndPan(){const element=document.getElementById('lightbox-content');if(element){element.style.transform=`translate(${translateX}px, ${translateY}px) scale(${currentZoom})`}}
-
-        function zoom(direction){const zoomStep=0.2;if(direction==='in')currentZoom+=zoomStep;else if(direction==='out'&&currentZoom>zoomStep)currentZoom-=zoomStep;if(currentZoom<=1){currentZoom=1;translateX=0;translateY=0}
-
-        applyZoomAndPan()}
-
-        function handleWheelZoom(e){e.preventDefault();if(e.deltaY<0)zoom('in');else zoom('out')}
-
-        function startPan(e){if(currentZoom<=1)return;e.preventDefault();isPanning=true;startX=e.clientX-translateX;startY=e.clientY-translateY;e.target.classList.add('panning')}
-
-        function pan(e){if(!isPanning||currentZoom<=1)return;e.preventDefault();translateX=e.clientX-startX;translateY=e.clientY-startY;applyZoomAndPan()}
-
-        function endPan(e){isPanning=false;if(e.target.classList)e.target.classList.remove('panning')}
-
-        function exportToExcel(){const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir||!dir.personnel)return;const dataToExport=dir.personnel.map(p=>({"Unvan":p.title,"Norm Kadro":p.norm||0,"Mevcut Personel":p.current||0,"Fark":(p.current||0)-(p.norm||0)}));const totalNorm=dataToExport.reduce((sum,item)=>sum+item["Norm Kadro"],0);const totalCurrent=dataToExport.reduce((sum,item)=>sum+item["Mevcut Personel"],0);dataToExport.push({"Unvan":"TOPLAM","Norm Kadro":totalNorm,"Mevcut Personel":totalCurrent,"Fark":totalCurrent-totalNorm});const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:30},{wch:15},{wch:15},{wch:10}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Personel Durumu");XLSX.writeFile(wb,`${dir.name}_Personel_Durumu.xlsx`)}
-
-        function exportPersonnelListToExcel(){const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir||!dir.personnelList)return;const dataToExport=dir.personnelList.map((p,index)=>({"Sıra No":index+1,"Adı Soyadı":p.name,"Unvanı":p.title,"Sicil":p.sicil}));const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:10},{wch:30},{wch:40},{wch:15}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Personel Listesi");XLSX.writeFile(wb,`${dir.name}_Personel_Listesi.xlsx`)}
-
-        function hideModal(){modal.classList.add('hidden');document.body.style.overflow='auto';currentDirectorateId=null}
-
-        function switchTab(tabId){modalTabs.querySelectorAll('button').forEach(btn=>{const targetTab=btn.dataset.tab;if(targetTab===tabId){btn.classList.add('nav-active','border-blue-500','text-blue-600');btn.classList.remove('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}else{btn.classList.remove('nav-active','border-blue-500','text-blue-600');btn.classList.add('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}});tabPanes.forEach(pane=>{pane.id===`${tabId}-content`?pane.classList.remove('hidden'):pane.classList.add('hidden')})}
-
-        
-
-        // --- Merkezi Personel Yönetim Fonksiyonları ---
-
-        function populateAllPersonnelTable() {
-
-            const searchTerm = normalizeString(allPersonnelSearchInput.value);
-
-            const allPersonnel = getAggregatedPersonnel();
-
-            const filteredList = allPersonnel.filter(p => normalizeString(p.name).includes(searchTerm) || normalizeString(p.title).includes(searchTerm) || normalizeString(p.sicil?.toString()).includes(searchTerm) || normalizeString(p.directorateName).includes(searchTerm));
-
-            allPersonnelTableBody.innerHTML = '';
-
-            if (filteredList.length === 0) {
-
-                allPersonnelTableBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">Arama kriterlerine uygun personel bulunamadı.</td></tr>`;
-
-                return;
-
-            }
-
-            filteredList.forEach(p => {
-
-                const row = document.createElement('tr');
-
-                row.dataset.dirId = p.directorateId;
-
-                row.dataset.index = p.originalIndex;
-
-                row.innerHTML = createAllPersonnelRowView(p);
-
-                allPersonnelTableBody.appendChild(row);
-
-            });
-
-            updateBulkDeleteButton();
-
-        }
-
-
-
-        // GÜNCELLENDİ: createAllPersonnelRowView fonksiyonuna checkbox eklendi.
-
-        function createAllPersonnelRowView(p) {
-
-            return `
-
-                <td class="px-4 py-4"><input type="checkbox" class="personnel-checkbox" data-sicil="${p.sicil || ''}"></td>
-
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name || ''}</td>
-
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.title || ''}</td>
-
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil || ''}</td>
-
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">${p.directorateName || ''}</td>
-
-                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-
-                    <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button>
-
-                    <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button>
-
-                </td>`;
-
-        }
-
-
-
-        function createAllPersonnelRowEdit(p,isNew=false){const directorateOptions=directorateData.map(dir=>`<option value="${dir.id}" ${p.directorateId===dir.id?'selected':''}>${dir.name}</option>`).join('');return`<td class="px-4 py-4"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td><td class="px-2 py-2"><select class="personnel-list-input" data-field="directorateId">${directorateOptions}</select></td><td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"><button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button><button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button></td>`}
-
-        function handleAllPersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const dirId=row.dataset.dirId;const index=parseInt(row.dataset.index,10);const isNew=!row.hasAttribute('data-index');if(action==='edit'){const dir=directorateData.find(d=>d.id===dirId);if(!dir)return;const person=dir.personnelList[index];person.directorateId=dirId;row.innerHTML=createAllPersonnelRowEdit(person)}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const newPersonData={};let newDirId=dirId;inputs.forEach(input=>{if(input.dataset.field==='directorateId'){newDirId=input.value}else{newPersonData[input.dataset.field]=input.value}});if(isNew){const targetDir=directorateData.find(d=>d.id===newDirId);if(targetDir){if(!targetDir.personnelList)targetDir.personnelList=[];targetDir.personnelList.push(newPersonData)}}else{const originalDir=directorateData.find(d=>d.id===dirId);if(!originalDir)return;if(dirId===newDirId){originalDir.personnelList[index]=newPersonData}else{const personToMove=originalDir.personnelList.splice(index,1)[0];const newDir=directorateData.find(d=>d.id===newDirId);if(newDir){if(!newDir.personnelList)newDir.personnelList=[];const updatedPerson={...personToMove,...newPersonData};newDir.personnelList.push(updatedPerson)}}}
-
-        saveData();refreshAllViews();populateAllPersonnelTable()}else if(action==='delete'){if(button.classList.contains('confirm-delete')){const dir=directorateData.find(d=>d.id===dirId);if(dir&&dir.personnelList){dir.personnelList.splice(index,1);saveData();refreshAllViews();populateAllPersonnelTable()}}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='cancel'){if(isNew){row.remove()}else{populateAllPersonnelTable()}}}
-
-        
-
-        // GÜNCELLENDİ: Toplu Yükleme fonksiyonu artık ekleme/güncelleme mantığı ile çalışıyor.
-
-        function handleAllPersonnelExcelImport(event) {
-
-            const file = event.target.files[0];
-
-            if (!file) return;
-
-
-
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-
-                try {
-
-                    const data = new Uint8Array(e.target.result);
-
-                    const workbook = XLSX.read(data, { type: 'array' });
-
-                    const firstSheetName = workbook.SheetNames[0];
-
-                    const worksheet = workbook.Sheets[firstSheetName];
-
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-
-
-
-                    let addedCount = 0;
-
-                    let updatedCount = 0;
-
-                    let failedCount = 0;
-
-                    let failedList = [];
-
-
-
-                    const allPersonnelMap = new Map();
-
-                    directorateData.forEach(dir => {
-
-                        dir.personnelList.forEach((p, index) => {
-
-                            if(p.sicil) allPersonnelMap.set(String(p.sicil), { person: p, dirId: dir.id, index: index });
-
-                        });
-
-                    });
-
-
-
-                    json.forEach(row => {
-
-                        const name = getValueFromRow(row, ['Adı Soyadı', 'Adi Soyadi', 'Ad Soyad']);
-
-                        const title = getValueFromRow(row, ['Unvanı', 'Unvani', 'Unvan']);
-
-                        const sicil = getValueFromRow(row, ['Sicil', 'Sicil No']);
-
-                        const birimAdiRaw = getValueFromRow(row, ['Birim Adı', 'Birim_Adi', 'Birim']);
-
-                        
-
-                        if (!sicil || !name || !title || !birimAdiRaw) {
-
-                            failedCount++;
-
-                            failedList.push(`Eksik Bilgi (Satır: ${JSON.stringify(row)})`);
-
-                            return;
-
-                        }
-
-
-
-                        const normalizedBirimAdi = normalizeString(birimAdiRaw);
-
-                        const targetDir = directorateData.find(d => normalizeString(d.name) === normalizedBirimAdi);
-
-
-
-                        if (!targetDir) {
-
-                            failedCount++;
-
-                            failedList.push(`${String(birimAdiRaw).trim()} (Birim Bulunamadı)`);
-
-                            return;
-
-                        }
-
-
-
-                        const existingEntry = allPersonnelMap.get(String(sicil));
-
-                        const newPersonData = { name: String(name).trim(), title: String(title).trim(), sicil: String(sicil).trim() };
-
-
-
-                        if (existingEntry) { // Personel mevcut, güncelle
-
-                            const originalDir = directorateData.find(d => d.id === existingEntry.dirId);
-
-                            if (originalDir.id === targetDir.id) { // Aynı birimde, direkt güncelle
-
-                                originalDir.personnelList[existingEntry.index] = newPersonData;
-
-                            } else { // Farklı birime geçmiş, taşı ve güncelle
-
-                                originalDir.personnelList.splice(existingEntry.index, 1);
-
-                                targetDir.personnelList.push(newPersonData);
-
-                            }
-
-                            updatedCount++;
-
-                        } else { // Personel yeni, ekle
-
-                            targetDir.personnelList.push(newPersonData);
-
-                            addedCount++;
-
-                        }
-
-                    });
-
-
-
-                    saveData();
-
-                    refreshAllViews();
-
-                    populateAllPersonnelTable();
-
-
-
-                    let alertMessage = `${addedCount} yeni personel eklendi.\n${updatedCount} personel güncellendi.\n${failedCount} satır işlenemedi.`;
-
-                    if (failedCount > 0) {
-
-                        alertMessage += `\n\nHatalı Satırlar (ilk 5):\n- ${[...new Set(failedList)].slice(0, 5).join('\n- ')}`;
-
-                    }
-
-                    alert(alertMessage);
-
-
-
-                } catch (err) {
-
-                    console.error("Toplu personel yükleme hatası:", err);
-
-                    alert("Excel dosyası işlenirken bir hata oluştu. Lütfen şablonu ve veri formatını kontrol edin.");
-
-                } finally {
-
-                    importAllPersonnelExcelInput.value = '';
-
-                }
-
-            };
-
-            reader.readAsArrayBuffer(file);
-
-        }
-
-
-
-        function exportAllPersonnelToExcel(){const allPersonnel=getAggregatedPersonnel();if(allPersonnel.length===0){alert("Dışa aktarılacak personel bulunmamaktadır.");return}
-
-        const dataToExport=allPersonnel.map(p=>({"Adı Soyadı":p.name,"Unvanı":p.title,"Sicil":p.sicil,"Birim Adı":p.directorateName}));const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:30},{wch:40},{wch:15},{wch:30}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Tüm Personel Listesi");XLSX.writeFile(wb,`Tüm_Personel_Listesi.xlsx`)}
-
-        function downloadNormTemplateForGroup(groupType){const groupMapping={'bolge':['bolge'],'tapu':['elazig','malatya','bingol','tunceli'],'kadastro':['kadastro']};const relevantGroups=groupMapping[groupType];const filteredDirs=directorateData.filter(dir=>relevantGroups.includes(dir.group));let templateData=[];filteredDirs.forEach(dir=>{dir.personnel.forEach(p=>{templateData.push({"Birim_Adi":dir.name,"Unvan":p.title,"Norm_Sayisi":p.norm,"Mevcut_Sayisi":p.current})})});const ws=XLSX.utils.json_to_sheet(templateData,{header:["Birim_Adi","Unvan","Norm_Sayisi","Mevcut_Sayisi","Fark"]});for(let i=2;i<=templateData.length+1;i++){ws[`E${i}`]={t:'n',f:`D${i}-C${i}`}}
-
-        ws['!cols']=[{wch:30},{wch:30},{wch:15},{wch:15},{wch:10}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Norm Kadro Şablonu");XLSX.writeFile(wb,`Norm_Kadro_${groupType.toUpperCase()}_Sablonu.xlsx`)}
-
-        function handleNormExcelUpload(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e)=>{try{const data=new Uint8Array(e.target.result);const workbook=XLSX.read(data,{type:'array'});const firstSheetName=workbook.SheetNames[0];const worksheet=workbook.Sheets[firstSheetName];const json=XLSX.utils.sheet_to_json(worksheet);let updatedCount=0;let notFoundCount=0;const notFoundList=[];json.forEach(row=>{const birimAdiRaw=getValueFromRow(row,['Birim_Adi','Birim Adı','Birim']);const unvanRaw=getValueFromRow(row,['Unvan','Unvanı']);const normSayisi=parseInt(getValueFromRow(row,['Norm_Sayisi','Norm Sayısı','Norm']),10);const mevcutSayisi=parseInt(getValueFromRow(row,['Mevcut_Sayisi','Mevcut Sayısı','Mevcut']),10);if(!birimAdiRaw||!unvanRaw||isNaN(normSayisi)||isNaN(mevcutSayisi)){notFoundCount++;notFoundList.push(`Hatalı Satır: ${JSON.stringify(row)}`);return}
-
-        const normalizedBirimAdi=normalizeString(birimAdiRaw);const dir=directorateData.find(d=>normalizeString(d.name)===normalizedBirimAdi);if(dir){const normalizedUnvan=normalizeString(unvanRaw);const personnelItem=dir.personnel.find(p=>normalizeString(p.title)===normalizedUnvan);if(personnelItem){personnelItem.norm=normSayisi;personnelItem.current=mevcutSayisi;updatedCount++}else{notFoundCount++;notFoundList.push(`${String(birimAdiRaw).trim()} -> ${String(unvanRaw).trim()}`)}}else{notFoundCount++;notFoundList.push(`${String(birimAdiRaw).trim()} (Birim bulunamadı)`)}});saveData();refreshAllViews();normUploadReport.classList.remove('hidden');normUploadReport.innerHTML=`
-
-                        <p class="font-bold text-green-700">${updatedCount} adet kadro satırı başarıyla güncellendi.</p>
-
-                        <p class="font-bold text-red-700 mt-2">${notFoundCount} adet satır işlenemedi.</p>
-
-                        ${notFoundList.length>0?`<p class="text-xs text-gray-600 mt-2">Eşleşmeyenler (ilk 5): ${[...new Set(notFoundList)].slice(0,5).join(', ')}...</p>`:''}`}catch(err){console.error("Excel dosyası okunurken hata:",err);alert("Excel dosyası okunurken bir hata oluştu. Lütfen dosya formatını kontrol edin.")}finally{normExcelInput.value=''}};reader.readAsArrayBuffer(file)}
-
-        function refreshAllViews(){renderSummaryDashboard();renderAllCards()}
-
-        function refreshModalViews(dir){populatePersonnelList(dir.personnelList,dir.id)}
-
-        function switchCentralTab(tabId){centralModalTabs.querySelectorAll('button').forEach(btn=>{const targetTab=btn.dataset.tab;if(targetTab===tabId){btn.classList.add('nav-active','border-blue-500','text-blue-600');btn.classList.remove('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}else{btn.classList.remove('nav-active','border-blue-500','text-blue-600');btn.classList.add('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}});centralTabPanes.forEach(pane=>{pane.id===`${tabId}-content`?pane.classList.remove('hidden'):pane.classList.add('hidden')})}
-
-        
-
-        // YENİ: Toplu silme butonunun durumunu güncelleyen fonksiyon
-
-        function updateBulkDeleteButton() {
-
-            const checkedBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox:checked');
-
-            const count = checkedBoxes.length;
-
-            bulkDeleteCount.textContent = count;
-
-            if (count > 0) {
-
-                bulkDeleteBtn.disabled = false;
-
-            } else {
-
-                bulkDeleteBtn.disabled = true;
-
-            }
-
-            const allBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox');
-
-            selectAllPersonnelCheckbox.checked = allBoxes.length > 0 && count === allBoxes.length;
-
-        }
-
-        
-
-        // --- Olay Dinleyicileri ---
-
-        document.addEventListener('DOMContentLoaded', () => { loadData(); refreshAllViews(); });
-
-        closeModalBtn.addEventListener('click',hideModal);modal.addEventListener('click',(e)=>{if(e.target===modal)hideModal()});
-
-        document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){hideModal();allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto';closeLightbox();}});
-
-        modalTabs.addEventListener('click',(e)=>{const button=e.target.closest('button');if(button&&button.dataset.tab)switchTab(button.dataset.tab)});
-
-        exportExcelBtn.addEventListener('click',exportToExcel);
-
-        personnelSearchInput.addEventListener('input',(e)=>{const searchTerm=normalizeString(e.target.value);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(dir&&dir.personnelList){const filteredList=dir.personnelList.filter(p=>normalizeString(p.name).includes(searchTerm)||normalizeString(p.title).includes(searchTerm)||(p.sicil&&normalizeString(p.sicil.toString()).includes(searchTerm)));populatePersonnelList(filteredList,dir.id)}});
-
-        exportPersonnelListExcelBtn.addEventListener('click',exportPersonnelListToExcel);
-
-        importPersonnelExcelBtn.addEventListener('click',()=>importPersonnelExcelInput.click());
-
-        importPersonnelExcelInput.addEventListener('change',(e)=>handleExcelImport(e,currentDirectorateId));
-
-        personnelListTableBody.addEventListener('click',handlePersonnelListAction);
-
-        addPersonnelBtn.addEventListener('click',()=>{const newRow=document.createElement('tr');newRow.innerHTML=createPersonnelRowEdit({});personnelListTableBody.appendChild(newRow)});
-
-        lightboxCloseBtn.addEventListener('click',closeLightbox);zoomInBtn.addEventListener('click',()=>zoom('in'));zoomOutBtn.addEventListener('click',()=>zoom('out'));
-
-        closeAllPersonnelModalBtn.addEventListener('click',()=>{allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto'});
-
-        allPersonnelModal.addEventListener('click',(e)=>{if(e.target===allPersonnelModal){allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto'}});
-
-        allPersonnelSearchInput.addEventListener('input',populateAllPersonnelTable);
-
-        allPersonnelTableBody.addEventListener('click',handleAllPersonnelListAction);
-
-        addAllPersonnelBtn.addEventListener('click',()=>{const newRow=document.createElement('tr');newRow.innerHTML=createAllPersonnelRowEdit({},true);allPersonnelTableBody.insertBefore(newRow,allPersonnelTableBody.firstChild)});
-
-        importAllPersonnelExcelBtn.addEventListener('click',()=>importAllPersonnelExcelInput.click());
-
-        importAllPersonnelExcelInput.addEventListener('change',handleAllPersonnelExcelImport);
-
-        exportAllPersonnelExcelBtn.addEventListener('click',exportAllPersonnelToExcel);
-
-        centralModalTabs.addEventListener('click', (e) => { const button = e.target.closest('button'); if (button && button.dataset.tab) { switchCentralTab(button.dataset.tab); } });
-
-        normTemplateButtons.forEach(btn=>{btn.addEventListener('click',(e)=>{const group=e.currentTarget.dataset.group;downloadNormTemplateForGroup(group)})});
-
-        normUploadButtons.forEach(btn=>{btn.addEventListener('click',(e)=>{currentNormUploadGroup=e.currentTarget.dataset.group;normExcelInput.click()})});
-
-        normExcelInput.addEventListener('change',handleNormExcelUpload);
-
-
-
-        // YENİ: Toplu silme olay dinleyicileri
-
-        allPersonnelTableBody.addEventListener('change', (e) => {
-
-            if (e.target.classList.contains('personnel-checkbox')) {
-
-                updateBulkDeleteButton();
-
-            }
-
-        });
-
-        selectAllPersonnelCheckbox.addEventListener('change', (e) => {
-
-            allPersonnelTableBody.querySelectorAll('.personnel-checkbox').forEach(checkbox => {
-
-                checkbox.checked = e.target.checked;
-
-            });
-
-            updateBulkDeleteButton();
-
-        });
-
-        bulkDeleteBtn.addEventListener('click', () => {
-
-            const checkedBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox:checked');
-
-            const count = checkedBoxes.length;
-
-            if (count === 0) return;
-
-
-
-            if (confirm(`${count} adet personel kalıcı olarak silinecektir. Emin misiniz?`)) {
-
-                const sicilsToDelete = new Set();
-
-                checkedBoxes.forEach(box => {
-
-                    sicilsToDelete.add(box.dataset.sicil);
-
-                });
-
-
-
-                directorateData.forEach(dir => {
-
-                    dir.personnelList = dir.personnelList.filter(p => !sicilsToDelete.has(String(p.sicil)));
-
-                });
-
-
-
-                saveData();
-
-                refreshAllViews();
-
-                populateAllPersonnelTable();
-
-            }
-
-        });
-
-
-
-    </script>
-
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <img src="https://placehold.co/100x40/002d72/ffffff?text=TKGM" alt="TKGM Logo" class="h-10">
+                    <div class="ml-4">
+                        <h1 class="text-xl font-bold text-gray-900">Birim Yönetim Portalı</h1>
+                        <p class="text-sm text-gray-500">Elazığ Bölge Müdürlüğü</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-md font-bold text-blue-900">Tapu ve Kadastro XVI.(Elazığ) Bölge Müdürlüğü</span>
+                    <i class="fa-solid fa-star text-yellow-400"></i>
+                    <i class="fa-solid fa-star text-blue-800"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div id="dashboard-container" class="mb-10">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                <h2 class="text-3xl font-bold group-header flex-shrink-0" style="margin-bottom: 0;">Genel Durum Panosu</h2>
+                <div id="summary-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full"></div>
+            </div>
+        </div>
+        <div id="bolge-section" class="mb-10">
+            <h2 class="text-2xl font-bold group-header">Bölge Müdürlüğü</h2>
+            <div id="bolge-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+        <div id="kadastro-section" class="mb-10">
+            <h2 class="text-2xl font-bold group-header">Kadastro Müdürlükleri</h2>
+            <div id="kadastro-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+        <div id="elazig-section" class="mb-10">
+            <h2 class="text-2xl font-bold group-header">Elazığ Tapu Müdürlükleri</h2>
+            <div id="elazig-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+        <div id="malatya-section" class="mb-10">
+            <h2 class="text-2xl font-bold group-header">Malatya Tapu Müdürlükleri</h2>
+            <div id="malatya-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+        <div id="bingol-section" class="mb-10">
+            <h2 class="text-2xl font-bold group-header">Bingöl Tapu Müdürlükleri</h2>
+            <div id="bingol-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+        <div id="tunceli-section" class="mb-10">
+            <h2 class="text-2xl font-bold group-header">Tunceli Tapu Müdürlükleri</h2>
+            <div id="tunceli-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        </div>
+    </main>
+
+    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div id="modal-content" class="bg-white rounded-lg shadow-2xl w-full max-w-6xl flex flex-col modal-content"><div class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg"><h3 id="modal-title" class="text-2xl font-bold text-gray-900"></h3><button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-2x"></i></button></div><div class="flex-grow p-6 overflow-y-auto"><div class="border-b border-gray-200 mb-6"><nav id="modal-tabs" class="-mb-px flex space-x-8" aria-label="Tabs"><button data-tab="personnel" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-users mr-2"></i>Personel Durumu</button><button data-tab="personnel-list" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-address-book mr-2"></i>Personel Listesi</button><button data-tab="projects" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-drafting-compass mr-2"></i>Mimari Projeler</button><button data-tab="photos" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-camera-retro mr-2"></i>Oda Resimleri</button></nav></div><div id="tab-content"><div id="personnel-content" class="tab-pane"><div class="flex justify-end mb-4"><button id="export-excel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-excel mr-2"></i>Excel'e Aktar</button></div><div class="overflow-x-auto rounded-lg border"><table class="min-w-full divide-y divide-gray-200"><thead class="table-header-sticky"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvan</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Norm</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Mevcut</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Fark</th></tr></thead><tbody id="personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div><div id="personnel-list-content" class="tab-pane hidden"><div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4"><div class="relative w-full sm:w-auto flex-grow"><input type="text" id="personnel-search-input" placeholder="Personel ara..." class="w-full pl-10 pr-4 py-2 border rounded-full"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div></div><div class="flex items-center gap-2"><input type="file" id="import-personnel-excel-input" class="hidden" accept=".xlsx, .xls"><button id="import-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-import mr-2"></i>Excel'den Yükle</button><button id="export-personnel-list-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-export mr-2"></i>Listeyi Dışa Aktar</button></div></div><div class="overflow-auto rounded-lg border" style="max-height: 55vh;"><table class="min-w-full divide-y divide-gray-200"><thead class="table-header-sticky"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider w-32">İşlemler</th></tr></thead><tbody id="personnel-list-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div><div class="mt-4 flex justify-end"><button id="add-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button></div></div><div id="projects-content" class="tab-pane hidden"><div id="projects-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div><div id="photos-content" class="tab-pane hidden"><div id="photos-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div></div></div></div></div>
+    
+    <div id="all-personnel-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-7xl flex flex-col modal-content">
+            <div id="all-personnel-modal-header" class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                <h3 id="all-personnel-modal-title" class="text-2xl font-bold text-gray-900 flex items-center gap-3"><i class="fas fa-users-cog text-blue-800"></i> Merkezi Yönetim Paneli</h3>
+                <button id="close-all-personnel-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-2x"></i></button>
+            </div>
+            <div class="flex-grow p-6 overflow-y-auto">
+                <div class="border-b border-gray-200 mb-6">
+                    <nav id="central-modal-tabs" class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button data-tab="central-personnel-list" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg">
+                            <i class="fas fa-users mr-2"></i>Personel Listesi
+                        </button>
+                        <button data-tab="central-norm-management" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg">
+                            <i class="fas fa-sitemap mr-2"></i>Toplu Norm Yönetimi
+                        </button>
+                    </nav>
+                </div>
+                
+                <div id="central-tab-content">
+                    <div id="central-personnel-list-content" class="central-tab-pane">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                            <div class="relative w-full sm:w-auto flex-grow">
+                                <input type="text" id="all-personnel-search-input" placeholder="Personel veya Birim Ara..." class="w-full pl-10 pr-4 py-2 border rounded-full">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap justify-end">
+                                <button id="bulk-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-trash-alt mr-2"></i>Seçilenleri Sil (<span id="bulk-delete-count">0</span>)</button>
+                                <input type="file" id="import-all-personnel-excel-input" class="hidden" accept=".xlsx, .xls">
+                                <button id="import-all-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-import mr-2"></i>Yükle/Güncelle</button>
+                                <button id="export-all-personnel-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-export mr-2"></i>Tüm Listeyi Aktar</button>
+                            </div>
+                        </div>
+                        <div class="overflow-auto rounded-lg border" style="max-height: 60vh;">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="table-header-sticky">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 w-4"><input type="checkbox" id="select-all-personnel-checkbox"></th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Birim</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider w-32">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button id="add-all-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button>
+                        </div>
+                    </div>
+
+                    <div id="central-norm-management-content" class="central-tab-pane hidden">
+                         <div class="space-y-6">
+                             <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                 <p class="font-semibold text-blue-800"><i class="fas fa-info-circle mr-2"></i>Nasıl Çalışır?</p>
+                                 <p class="text-sm text-blue-700 mt-1">
+                                     İlgili grup için şablonu indirin. Şablonda mevcut durum referans olarak yer alır. Güncelleme yapmak için **'Norm_Sayisi' ve 'Mevcut_Sayisi' sütunlarını** değiştirip dosyayı kaydedin ve ilgili 'Excel Yükle' butonu ile sisteme yükleyin. 'Fark' sütunu Excel'de otomatik hesaplanır.
+                                 </p>
+                             </div>
+                            
+                             <div class="border rounded-lg p-4">
+                                 <h4 class="font-semibold text-lg text-gray-700 mb-3">Bölge Müdürlüğü</h4>
+                                 <div class="flex flex-col sm:flex-row gap-4">
+                                     <button data-group="bolge" class="norm-template-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-download"></i><span>Şablonu İndir</span></button>
+                                     <button data-group="bolge" class="norm-upload-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-upload"></i><span>Excel Yükle</span></button>
+                                 </div>
+                             </div>
+                             <div class="border rounded-lg p-4">
+                                 <h4 class="font-semibold text-lg text-gray-700 mb-3">Tapu Müdürlükleri</h4>
+                                 <div class="flex flex-col sm:flex-row gap-4">
+                                     <button data-group="tapu" class="norm-template-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-download"></i><span>Şablonu İndir</span></button>
+                                     <button data-group="tapu" class="norm-upload-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-upload"></i><span>Excel Yükle</span></button>
+                                 </div>
+                             </div>
+                             <div class="border rounded-lg p-4">
+                                 <h4 class="font-semibold text-lg text-gray-700 mb-3">Kadastro Müdürlükleri</h4>
+                                 <div class="flex flex-col sm:flex-row gap-4">
+                                     <button data-group="kadastro" class="norm-template-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-download"></i><span>Şablonu İndir</span></button>
+                                     <button data-group="kadastro" class="norm-upload-btn w-full sm:w-1/2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"><i class="fas fa-upload"></i><span>Excel Yükle</span></button>
+                                 </div>
+                             </div>
+                             <input type="file" id="norm-excel-input" class="hidden" accept=".xlsx, .xls">
+                             <div id="norm-upload-report" class="hidden p-4 bg-gray-100 rounded-lg text-sm"></div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="lightbox"><div id="lightbox-content-wrapper"></div><button id="lightbox-close" class="lightbox-control"><i class="fas fa-times"></i></button><div id="lightbox-zoom-controls"><button id="zoom-in" class="lightbox-control" style="position: static;"><i class="fas fa-plus"></i></button><button id="zoom-out" class="lightbox-control" style="position: static;"><i class="fas fa-minus"></i></button></div></div>
+
+    <script>
+        // --- Global Değişkenler ve Veri Paketi ---
+        let directorateData = [];
+        let currentDirectorateId = null;
+        let currentZoom = 1, isPanning = false, startX, startY, translateX, translateY;
+        let currentNormUploadGroup = '';
+        const initialData = [ { id: 'bolge_md', name: 'BÖLGE MÜDÜRLÜĞÜ', group: 'bolge', personnel: [ { title: 'Bölge Müdürü', norm: 1, current: 1 }, { title: 'Bölge Müdür Yrd.', norm: 2, current: 2 }, { title: 'Şube Müdürü', norm: 5, current: 5 }, { title: 'Mühendis', norm: 2, current: 0 }, { title: 'Avukat', norm: 1, current: 0 }, { title: 'İşlem Yapan Personel', norm: 14, current: 22 }, { title: 'Programcı', norm: 1, current: 0 }, { title: 'Arşiv Görevlisi', norm: 1, current: 1 }, { title: 'Şoför', norm: 7, current: 7 }, { title: 'Güvenlik Personeli', norm: 0, current: 3 }, { title: 'Destek Personeli', norm: 3, current: 8 } ], personnelList: [], projects: [], photos: [] }, { id: 'elazig_km', name: 'ELAZIĞ KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 11, current: 13 }, { title: 'Teknisyen/Tekniker', norm: 23, current: 33 }, { title: 'İşlem Yapan Personel', norm: 3, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 5, current: 6 }, { title: 'Şoför', norm: 1, current: 1 }, { title: 'Güvenlik Personeli', norm: 0, current: 0 } ], personnelList: [], projects: [], photos: [] }, { id: 'malatya_km', name: 'MALATYA KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 2, current: 2 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 15, current: 4 }, { title: 'Teknisyen/Tekniker', norm: 28, current: 36 }, { title: 'İşlem Yapan Personel', norm: 3, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 6, current: 4 }, { title: 'Şoför', norm: 2, current: 1 }, { title: 'Güvenlik Personeli', norm: 1, current: 6 } ], personnelList: [], projects: [], photos: [] }, { id: 'bingol_km', name: 'BİNGÖL KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 4, current: 8 }, { title: 'Teknisyen/Tekniker', norm: 11, current: 12 }, { title: 'İşlem Yapan Personel', norm: 1, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 3, current: 4 }, { title: 'Şoför', norm: 1, current: 1 }, { title: 'Güvenlik Personeli', norm: 5, current: 5 } ], personnelList: [], projects: [], photos: [] }, { id: 'tunceli_km', name: 'TUNCELİ KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 3, current: 8 }, { title: 'Teknisyen/Tekniker', norm: 5, current: 17 }, { title: 'İşlem Yapan Personel', norm: 1, current: 0 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 3, current: 2 }, { title: 'Şoför', norm: 1, current: 0 }, { title: 'Güvenlik Personeli', norm: 1, current: 0 } ], personnelList: [], projects: [], photos: [] }, { id: 'elazig_tm', name: 'ELAZIĞ TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 7, current: 6 }, { title: 'İşlem Yapan Personel', norm: 40, current: 39 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 4, current: 3 }], personnelList: [], projects: [], photos: [] }, { id: 'agin_tm', name: 'AĞIN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'alacakaya_tm', name: 'ALACAKAYA TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'aricak_tm', name: 'ARICAK TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'baskil_tm', name: 'BASKİL TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'karakocan_tm', name: 'KARAKOÇAN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 4 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'keban_tm', name: 'KEBAN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kovancilar_tm', name: 'KOVANCILAR TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 6 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'maden_tm', name: 'MADEN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'palu_tm', name: 'PALU TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'sivrice_tm', name: 'SİVRİCE TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'battalgazi_tm', name: 'BATTALGAZİ TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 3, current: 3 }, { title: 'İşlem Yapan Personel', norm: 17, current: 23 }, { title: 'Arşiv Görevlisi', norm: 2, current: 1 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'yesilyurt_tm', name: 'YEŞİLYURT TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 3, current: 3 }, { title: 'İşlem Yapan Personel', norm: 19, current: 23 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 2, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'akcadag_tm', name: 'AKÇADAĞ TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 7 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'arapgir_tm', name: 'ARAPGİR TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'arguvan_tm', name: 'ARGUVAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'darende_tm', name: 'DARENDE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 4 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'dogansehir_tm', name: 'DOĞANŞEHİR TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 5 }, { title: 'Arşiv Görevlisi', norm: 2, current: 1 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'doganyol_tm', name: 'DOĞANYOL TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'hekimhan_tm', name: 'HEKİMHAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'kale_tm', name: 'KALE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kuluncak_tm', name: 'KULUNCAK TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'puturge_tm', name: 'PÜTÜRGE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'yazihan_tm', name: 'YAZIHAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'tunceli_tm', name: 'TUNCELİ TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 7 }, { title: 'Arşiv Görevlisi', norm: 3, current: 0 }, { title: 'Destek Personeli', norm: 2, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'cemisgezek_tm', name: 'ÇEMİŞGEZEK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'hozat_tm', name: 'HOZAT TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'mazgirt_tm', name: 'MAZGİRT TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'nazimiye_tm', name: 'NAZİMİYE TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'ovacik_tm', name: 'OVACIK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'pertek_tm', name: 'PERTEK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 4 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'pulumur_tm', name: 'PÜLÜMÜR TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 1 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'bingol_tm', name: 'BİNGÖL TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 2, current: 1 }, { title: 'İşlem Yapan Personel', norm: 12, current: 13 }, { title: 'Arşiv Görevlisi', norm: 1, current: 1 }, { title: 'Destek Personeli', norm: 2, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'adakli_tm', name: 'ADAKLI TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'genc_tm', name: 'GENÇ TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'karliova_tm', name: 'KARLIOVA TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 3 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kigi_tm', name: 'KİĞI TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'solhan_tm', name: 'SOLHAN TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'yayladere_tm', name: 'YAYLADERE TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 1, current: 1 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'yedisu_tm', name: 'YEDİSU TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }];
+        
+        // --- DOM Elements ---
+        const modal = document.getElementById('detail-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const personnelTableBody = document.getElementById('personnel-table-body');
+        const projectsGallery = document.getElementById('projects-gallery');
+        const photosGallery = document.getElementById('photos-gallery');
+        const modalTabs = document.getElementById('modal-tabs');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        const exportExcelBtn = document.getElementById('export-excel-btn');
+        const personnelListTableBody = document.getElementById('personnel-list-table-body');
+        const personnelSearchInput = document.getElementById('personnel-search-input');
+        const exportPersonnelListExcelBtn = document.getElementById('export-personnel-list-excel-btn');
+        const importPersonnelExcelBtn = document.getElementById('import-personnel-excel-btn');
+        const importPersonnelExcelInput = document.getElementById('import-personnel-excel-input');
+        const addPersonnelBtn = document.getElementById('add-personnel-btn');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxContentWrapper = document.getElementById('lightbox-content-wrapper');
+        const lightboxCloseBtn = document.getElementById('lightbox-close');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const zoomControls = document.getElementById('lightbox-zoom-controls');
+        const allPersonnelModal = document.getElementById('all-personnel-modal');
+        const closeAllPersonnelModalBtn = document.getElementById('close-all-personnel-modal-btn');
+        const allPersonnelTableBody = document.getElementById('all-personnel-table-body');
+        const allPersonnelSearchInput = document.getElementById('all-personnel-search-input');
+        const addAllPersonnelBtn = document.getElementById('add-all-personnel-btn');
+        const exportAllPersonnelExcelBtn = document.getElementById('export-all-personnel-excel-btn');
+        const importAllPersonnelExcelBtn = document.getElementById('import-all-personnel-excel-btn');
+        const importAllPersonnelExcelInput = document.getElementById('import-all-personnel-excel-input');
+        const centralModalTabs = document.getElementById('central-modal-tabs');
+        const centralTabPanes = document.querySelectorAll('.central-tab-pane');
+        const normTemplateButtons = document.querySelectorAll('.norm-template-btn');
+        const normUploadButtons = document.querySelectorAll('.norm-upload-btn');
+        const normExcelInput = document.getElementById('norm-excel-input');
+        const normUploadReport = document.getElementById('norm-upload-report');
+        // YENİ: Toplu silme elementleri
+        const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+        const bulkDeleteCount = document.getElementById('bulk-delete-count');
+        const selectAllPersonnelCheckbox = document.getElementById('select-all-personnel-checkbox');
+
+        // --- Veri Yönetimi ve Yardımcı Fonksiyonlar ---
+        function normalizeString(str) { if (typeof str !== 'string') return ''; return str.trim().replace(/\s+/g, ' ').toLocaleLowerCase('tr-TR'); }
+        function getValueFromRow(row, possibleKeys) { const normalizedRowKeys = Object.keys(row).map(key => ({ original: key, normalized: normalizeString(key) })); for (const possibleKey of possibleKeys) { const normalizedPossibleKey = normalizeString(possibleKey); const foundKey = normalizedRowKeys.find(rk => rk.normalized === normalizedPossibleKey); if (foundKey) { return row[foundKey.original]; } } return undefined; }
+        function saveData() { try { localStorage.setItem('tkgmPortalData', JSON.stringify(directorateData)); } catch (e) { console.error("Veri kaydedilirken hata oluştu:", e); alert("Veriler kaydedilemedi. Tarayıcı depolama alanı dolu olabilir."); } }
+        function loadData() { const savedData = localStorage.getItem('tkgmPortalData'); if (savedData) { try { const parsedData = JSON.parse(savedData); if (Array.isArray(parsedData) && parsedData.every(item => 'id' in item && 'name' in item)) { directorateData = parsedData; } else { throw new Error("Invalid data structure"); } } catch (e) { console.error("Kaydedilmiş veri okunurken hata, başlangıç verileri kullanılıyor:", e); directorateData = JSON.parse(JSON.stringify(initialData)); } } else { directorateData = JSON.parse(JSON.stringify(initialData)); } directorateData.forEach(d => { if (!d.personnelList) d.personnelList = []; if (!d.projects) d.projects = []; if (!d.photos) d.photos = []; }); }
+        
+        // --- UI Fonksiyonları ---
+        function getAggregatedPersonnel() { let allPersonnel = []; directorateData.forEach(dir => { if (dir.personnelList && Array.isArray(dir.personnelList)) { dir.personnelList.forEach((p, index) => { allPersonnel.push({ ...p, directorateName: dir.name, directorateId: dir.id, originalIndex: index }); }); } }); return allPersonnel; }
+        function createGrandTotalCard(stats) { const { norm, current, unitCount } = stats; const difference = current - norm; const occupancyRate = norm > 0 ? Math.round((current / norm) * 100) : (current > 0 ? 100 : 0); let progressBarColor = 'bg-red-500'; if (occupancyRate >= 100) progressBarColor = 'bg-green-500'; else if (occupancyRate >= 90) progressBarColor = 'bg-yellow-400'; let diffClass = 'text-slate-700'; let diffBgClass = 'bg-slate-200'; if (difference > 0) { diffClass = 'text-green-800'; diffBgClass = 'bg-green-100'; } else if (difference < 0) { diffClass = 'text-red-800'; diffBgClass = 'bg-red-100'; } const card = document.createElement('div'); card.className = 'xl:col-span-2 bg-blue-50 rounded-lg shadow-lg p-4 flex flex-col justify-between border-l-8 border-blue-700'; card.innerHTML = `<div><div class="flex justify-between items-start"><div><p class="text-base font-bold text-blue-800">BÖLGE GENEL TOPLAM</p><p class="text-xs text-gray-500">${unitCount} Birim</p></div><div class="w-12 h-12 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-md"><i class="fas fa-bullseye fa-lg"></i></div></div><div class="mt-4"><div class="flex justify-between items-center mb-1"><span class="text-sm font-semibold text-gray-600">Genel Doluluk Oranı</span><span class="text-xl font-bold text-blue-800">${occupancyRate}%</span></div><div class="progress-bar-container bg-blue-100"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate > 100 ? 100 : occupancyRate}%;"></div></div></div></div><div class="mt-4 pt-4 border-t-2 border-blue-200 flex justify-between items-center text-base"><div><span class="text-gray-600">Norm:</span> <b class="text-gray-900 text-2xl">${norm}</b></div><div><span class="text-gray-600">Mevcut:</span> <b class="text-gray-900 text-2xl">${current}</b></div><div class="px-3 py-1 rounded-full ${diffBgClass} ${diffClass}"><b class="text-lg">${difference >= 0 ? '+' : ''}${difference}</b></div></div>`; return card; }
+        function createSummaryCard(title, iconClass, stats) { const { norm, current, unitCount } = stats; const difference = current - norm; const occupancyRate = norm > 0 ? Math.round((current / norm) * 100) : (current > 0 ? 100 : 0); let progressBarColor = 'bg-red-500'; if (occupancyRate >= 100) progressBarColor = 'bg-green-500'; else if (occupancyRate >= 90) progressBarColor = 'bg-yellow-400'; let diffClass = 'fark-sifir'; if (difference > 0) diffClass = 'bg-green-200 text-green-800'; else if (difference < 0) diffClass = 'bg-red-200 text-red-800'; const card = document.createElement('div'); card.className = 'bg-white rounded-lg shadow p-4 flex flex-col justify-between'; card.innerHTML = `<div><div class="flex justify-between items-start"><div><p class="text-sm font-semibold text-gray-500">${title}</p><p class="text-xs text-gray-400">${unitCount} Birim</p></div><div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas ${iconClass}"></i></div></div><div class="mt-3"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold text-gray-500">Doluluk Oranı</span><span class="text-sm font-bold ${progressBarColor.replace('bg', 'text')}">${occupancyRate}%</span></div><div class="progress-bar-container"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate > 100 ? 100 : occupancyRate}%;"></div></div></div></div><div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center text-sm"><div><span class="text-gray-500">Norm:</span><b class="text-gray-800">${norm}</b></div><div><span class="text-gray-500">Mevcut:</span><b class="text-gray-800">${current}</b></div><div class="px-2 py-0.5 rounded-full ${diffClass} text-xs"><b>${difference >= 0 ? '+' : ''}${difference}</b></div></div>`; return card; }
+        function createPersonnelManagementCard(stats) { const { totalInLists } = stats; const card = document.createElement('div'); card.className = `xl:col-span-2 bg-white rounded-lg shadow p-4 flex flex-col justify-between cursor-pointer hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1`; card.innerHTML = `<div><div class="flex justify-between items-start"><div><p class="text-sm font-semibold text-gray-500">Merkezi Yönetim</p><p class="text-xs text-gray-400">Personel & Norm</p></div><div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas fa-users-cog"></i></div></div><div class="mt-4 text-center"><p class="text-3xl font-bold text-gray-800">${totalInLists}</p><p class="text-sm text-gray-500">Kayıtlı Personel</p></div></div><div class="mt-3 pt-3 border-t border-gray-100 text-center"><span class="text-sm font-medium text-blue-600 hover:text-blue-800">Yönetim Panelini Aç <i class="fas fa-arrow-right ml-1"></i></span></div>`; card.addEventListener('click', () => { switchCentralTab('central-personnel-list'); populateAllPersonnelTable(); allPersonnelModal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }); return card; }
+        function renderSummaryDashboard() { if (!directorateData || directorateData.length === 0) return; const summaryContainer = document.getElementById('summary-dashboard'); summaryContainer.innerHTML = ''; const grandTotalNorm = directorateData.reduce((sum, dir) => sum + dir.personnel.reduce((s, p) => s + (p.norm || 0), 0), 0); const grandTotalCurrent = directorateData.reduce((sum, dir) => sum + dir.personnel.reduce((s, p) => s + (p.current || 0), 0), 0); const totalUnitCount = directorateData.length; summaryContainer.appendChild(createGrandTotalCard({ norm: grandTotalNorm, current: grandTotalCurrent, unitCount: totalUnitCount })); const tapuMuds = directorateData.filter(d => ['elazig', 'malatya', 'bingol', 'tunceli'].includes(d.group)); const kadastroMuds = directorateData.filter(d => d.group === 'kadastro'); const bolgeMuds = directorateData.filter(d => d.group === 'bolge'); const calculateTotals = (list) => list.reduce((acc, curr) => { const norm = curr.personnel.reduce((sum, p) => sum + (p.norm || 0), 0); const current = curr.personnel.reduce((sum, p) => sum + (p.current || 0), 0); acc.norm += norm; acc.current += current; return acc; }, { norm: 0, current: 0 }); summaryContainer.appendChild(createSummaryCard('Tapu Müdürlükleri', 'fa-building', { ...calculateTotals(tapuMuds), unitCount: tapuMuds.length })); summaryContainer.appendChild(createSummaryCard('Kadastro Müdürlükleri', 'fa-map-marked-alt', { ...calculateTotals(kadastroMuds), unitCount: kadastroMuds.length })); summaryContainer.appendChild(createSummaryCard('Bölge Müdürlüğü', 'fa-landmark', { ...calculateTotals(bolgeMuds), unitCount: bolgeMuds.length })); const totalInLists = getAggregatedPersonnel().length; summaryContainer.appendChild(createPersonnelManagementCard({ totalInLists })); }
+        function renderAllCards(){if(!directorateData||directorateData.length===0)return;document.querySelectorAll('[id$="-grid"]').forEach(grid=>grid.innerHTML='');directorateData.forEach(dir=>{const grid=document.getElementById(`${dir.group}-grid`);if(!grid)return;const totalNorm=dir.personnel.reduce((sum,p)=>sum+(p.norm||0),0);const totalCurrent=dir.personnel.reduce((sum,p)=>sum+(p.current||0),0);const difference=totalCurrent-totalNorm;const occupancyRate=totalNorm>0?Math.round((totalCurrent/totalNorm)*100):(totalCurrent>0?100:0);let progressBarColor='bg-red-500';if(occupancyRate>=90)progressBarColor='bg-green-500';else if(occupancyRate>=70)progressBarColor='bg-yellow-400';let diffClass='fark-sifir';let diffIcon='fa-minus';if(difference>0){diffClass='bg-green-200 text-green-800';diffIcon='fa-arrow-up'}else if(difference<0){diffClass='bg-red-200 text-red-800';diffIcon='fa-arrow-down'}
+        const card=document.createElement('div');card.className='bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1';card.dataset.id=dir.id;card.innerHTML=`<div class="p-5"><div class="flex justify-between items-start"><h3 class="text-lg font-bold text-gray-900 truncate pr-2">${dir.name}</h3><span class="text-xs font-bold px-2 py-1 rounded-full ${diffClass}"><i class="fas ${diffIcon} mr-1"></i> ${difference>=0?'+':''}${difference}</span></div><div class="mt-4"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold text-gray-500">Doluluk Oranı</span><span class="text-sm font-bold ${progressBarColor.replace('bg','text')}">${occupancyRate}%</span></div><div class="progress-bar-container"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate}%;"></div></div></div></div><div class="px-5 pb-5 flex justify-between items-center text-sm text-gray-600"><span>Norm: <b class="text-gray-900">${totalNorm}</b></span><span>Mevcut: <b class="text-gray-900">${totalCurrent}</b></span></div><div class="bg-gray-50 px-5 py-3 text-right"><span class="text-sm font-medium text-blue-600 hover:text-blue-800">Detayları Gör <i class="fas fa-arrow-right ml-1"></i></span></div>`;card.addEventListener('click',()=>showModal(dir.id));grid.appendChild(card)})}
+        function showModal(id){currentDirectorateId=id;const dir=directorateData.find(d=>d.id===id);if(!dir)return;modalTitle.textContent=dir.name;populatePersonnelTable(dir);populatePersonnelList(dir.personnelList||[],dir.id);personnelSearchInput.value='';populateGallery(projectsGallery,dir.projects,'projects');populateGallery(photosGallery,dir.photos,'photos');switchTab('personnel');modal.classList.remove('hidden');document.body.style.overflow='hidden'}
+        function populatePersonnelTable(dir){personnelTableBody.innerHTML='';personnelTableBody.dataset.id=dir.id;dir.personnel.forEach((p,index)=>{const difference=(p.current||0)-(p.norm||0);let diffClass='fark-sifir';if(difference>0)diffClass='fark-pozitif';if(difference<0)diffClass='fark-negatif';const row=document.createElement('tr');row.dataset.index=index;row.innerHTML=`<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.title}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.norm||0}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.current||0}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm text-center fark-cell ${diffClass}">${difference>=0?'+':''}${difference}</td>`;personnelTableBody.appendChild(row)})}
+        function populatePersonnelList(list,dirId){personnelListTableBody.innerHTML='';if(!list||list.length===0){personnelListTableBody.innerHTML=`<tr><td colspan="4" class="text-center py-10 text-gray-500">Bu birim için personel bilgisi bulunamadı.<br>Yukarıdaki 'Excel'den Yükle' butonu ile liste ekleyebilirsiniz.</td></tr>`;return}
+        list.forEach((p,index)=>{const row=document.createElement('tr');row.dataset.index=index;row.dataset.dirId=dirId;row.innerHTML=createPersonnelRowView(p);personnelListTableBody.appendChild(row)})}
+        function createPersonnelRowView(p){return` <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name||''}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.title||''}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil||''}</td> <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button> <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button> </td> `}
+        function createPersonnelRowEdit(p){return` <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td> <td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button> <button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button> </td> `}
+        function handlePersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const index=parseInt(row.dataset.index,10);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;if(action==='edit'){row.innerHTML=createPersonnelRowEdit(dir.personnelList[index])}else if(action==='delete'){if(button.classList.contains('confirm-delete')){dir.personnelList.splice(index,1);saveData();refreshModalViews(dir);refreshAllViews()}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const updatedPerson={};inputs.forEach(input=>{updatedPerson[input.dataset.field]=input.value});if(isNaN(index)){dir.personnelList.push(updatedPerson)}else{dir.personnelList[index]=updatedPerson}
+        saveData();refreshModalViews(dir);refreshAllViews()}else if(action==='cancel'){if(isNaN(index)){row.remove()}else{row.innerHTML=createPersonnelRowView(dir.personnelList[index])}}}
+        function handleExcelImport(event,targetDirId){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e)=>{const data=new Uint8Array(e.target.result);const workbook=XLSX.read(data,{type:'array'});const firstSheetName=workbook.SheetNames[0];const worksheet=workbook.Sheets[firstSheetName];let json=XLSX.utils.sheet_to_json(worksheet,{header:["name","title","sicil"]});if(json.length>0&&json[0].name&&normalizeString(json[0].name).includes('ad')){json.shift()}
+        const dir=directorateData.find(d=>d.id===targetDirId);if(dir){dir.personnelList=json.map(item=>({name:item.name||'',title:item.title||'',sicil:item.sicil||''}));saveData();refreshModalViews(dir);refreshAllViews()}
+        event.target.value=''};reader.readAsArrayBuffer(file)}
+        function populateGallery(galleryElement,items,galleryType){galleryElement.innerHTML='';const uploadCard=document.createElement('div');uploadCard.className='upload-card';const acceptTypes=galleryType==='projects'?'image/*,application/pdf':'image/*';uploadCard.innerHTML=`<label for="${galleryType}-upload" class="text-center text-gray-500 cursor-pointer"><i class="fas fa-plus-circle fa-3x"></i><p class="mt-2 font-semibold">${galleryType==='projects'?'Dosya Yükle':'Resim Yükle'}</p></label><input type="file" id="${galleryType}-upload" class="hidden" multiple accept="${acceptTypes}">`;galleryElement.appendChild(uploadCard);document.getElementById(`${galleryType}-upload`).addEventListener('change',handleFileUpload);if(items&&items.length>0){items.forEach((item,index)=>{const galleryItem=document.createElement('div');galleryItem.className='gallery-item';if(item.type&&item.type.startsWith('image/')){galleryItem.innerHTML=`<img src="${item.url}" alt="${item.title}" class="w-full h-48 object-cover rounded-lg border-2 border-gray-200"><div class="delete-btn" data-index="${index}" data-type="${galleryType}"><i class="fas fa-trash-alt"></i></div>`}else if(item.type==='application/pdf'){galleryItem.innerHTML=`<div class="pdf-thumbnail"><i class="fas fa-file-pdf"></i><span>${item.title}</span></div><div class="delete-btn" data-index="${index}" data-type="${galleryType}"><i class="fas fa-trash-alt"></i></div>`}
+        galleryItem.addEventListener('click',(e)=>{if(!e.target.closest('.delete-btn')){openLightbox(item)}});galleryElement.appendChild(galleryItem)})}}
+        function handleFileUpload(event){const files=event.target.files;if(!files.length)return;const galleryType=event.target.id.includes('projects')?'projects':'photos';const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;for(const file of files){const reader=new FileReader();reader.onload=(e)=>{const newFile={title:file.name,url:e.target.result,type:file.type};if(!dir[galleryType])dir[galleryType]=[];dir[galleryType].push(newFile);saveData();populateGallery(document.getElementById(`${galleryType}-gallery`),dir[galleryType],galleryType)};reader.readAsDataURL(file)}}
+        function handleDeleteFile(event){event.stopPropagation();if(!confirm("Bu dosyayı silmek istediğinizden emin misiniz?"))return;const button=event.currentTarget;const index=parseInt(button.dataset.index,10);const galleryType=button.dataset.type;const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir||!dir[galleryType])return;dir[galleryType].splice(index,1);saveData();populateGallery(document.getElementById(`${galleryType}-gallery`),dir[galleryType],galleryType)}
+        function openLightbox(item){lightboxContentWrapper.innerHTML='';resetZoomAndPan();if(item.type.startsWith('image/')){const img=document.createElement('img');img.id='lightbox-content';img.src=item.url;lightboxContentWrapper.appendChild(img);zoomControls.style.display='flex';addPanAndZoomListeners(img)}else if(item.type==='application/pdf'){const iframe=document.createElement('iframe');iframe.src=item.url;iframe.className='w-full h-full';lightboxContentWrapper.appendChild(iframe);zoomControls.style.display='none'}
+        lightbox.classList.add('show');document.body.style.overflow='hidden'}
+        function closeLightbox(){lightbox.classList.remove('show');document.body.style.overflow='auto';removePanAndZoomListeners()}
+        function resetZoomAndPan(){currentZoom=1;isPanning=false;translateX=0;translateY=0}
+        function addPanAndZoomListeners(element){element.addEventListener('mousedown',startPan);element.addEventListener('mousemove',pan);element.addEventListener('mouseup',endPan);element.addEventListener('mouseleave',endPan);element.addEventListener('wheel',handleWheelZoom)}
+        function removePanAndZoomListeners(){const element=document.getElementById('lightbox-content');if(element){element.removeEventListener('mousedown',startPan);element.removeEventListener('mousemove',pan);element.removeEventListener('mouseup',endPan);element.removeEventListener('mouseleave',endPan);element.removeEventListener('wheel',handleWheelZoom)}}
+        function applyZoomAndPan(){const element=document.getElementById('lightbox-content');if(element){element.style.transform=`translate(${translateX}px, ${translateY}px) scale(${currentZoom})`}}
+        function zoom(direction){const zoomStep=0.2;if(direction==='in')currentZoom+=zoomStep;else if(direction==='out'&&currentZoom>zoomStep)currentZoom-=zoomStep;if(currentZoom<=1){currentZoom=1;translateX=0;translateY=0}
+        applyZoomAndPan()}
+        function handleWheelZoom(e){e.preventDefault();if(e.deltaY<0)zoom('in');else zoom('out')}
+        function startPan(e){if(currentZoom<=1)return;e.preventDefault();isPanning=true;startX=e.clientX-translateX;startY=e.clientY-translateY;e.target.classList.add('panning')}
+        function pan(e){if(!isPanning||currentZoom<=1)return;e.preventDefault();translateX=e.clientX-startX;translateY=e.clientY-startY;applyZoomAndPan()}
+        function endPan(e){isPanning=false;if(e.target.classList)e.target.classList.remove('panning')}
+        function exportToExcel(){const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir||!dir.personnel)return;const dataToExport=dir.personnel.map(p=>({"Unvan":p.title,"Norm Kadro":p.norm||0,"Mevcut Personel":p.current||0,"Fark":(p.current||0)-(p.norm||0)}));const totalNorm=dataToExport.reduce((sum,item)=>sum+item["Norm Kadro"],0);const totalCurrent=dataToExport.reduce((sum,item)=>sum+item["Mevcut Personel"],0);dataToExport.push({"Unvan":"TOPLAM","Norm Kadro":totalNorm,"Mevcut Personel":totalCurrent,"Fark":totalCurrent-totalNorm});const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:30},{wch:15},{wch:15},{wch:10}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Personel Durumu");XLSX.writeFile(wb,`${dir.name}_Personel_Durumu.xlsx`)}
+        function exportPersonnelListToExcel(){const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir||!dir.personnelList)return;const dataToExport=dir.personnelList.map((p,index)=>({"Sıra No":index+1,"Adı Soyadı":p.name,"Unvanı":p.title,"Sicil":p.sicil}));const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:10},{wch:30},{wch:40},{wch:15}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Personel Listesi");XLSX.writeFile(wb,`${dir.name}_Personel_Listesi.xlsx`)}
+        function hideModal(){modal.classList.add('hidden');document.body.style.overflow='auto';currentDirectorateId=null}
+        function switchTab(tabId){modalTabs.querySelectorAll('button').forEach(btn=>{const targetTab=btn.dataset.tab;if(targetTab===tabId){btn.classList.add('nav-active','border-blue-500','text-blue-600');btn.classList.remove('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}else{btn.classList.remove('nav-active','border-blue-500','text-blue-600');btn.classList.add('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}});tabPanes.forEach(pane=>{pane.id===`${tabId}-content`?pane.classList.remove('hidden'):pane.classList.add('hidden')})}
+        
+        // --- Merkezi Personel Yönetim Fonksiyonları ---
+        function populateAllPersonnelTable() {
+            const searchTerm = normalizeString(allPersonnelSearchInput.value);
+            const allPersonnel = getAggregatedPersonnel();
+            const filteredList = allPersonnel.filter(p => normalizeString(p.name).includes(searchTerm) || normalizeString(p.title).includes(searchTerm) || normalizeString(p.sicil?.toString()).includes(searchTerm) || normalizeString(p.directorateName).includes(searchTerm));
+            allPersonnelTableBody.innerHTML = '';
+            if (filteredList.length === 0) {
+                allPersonnelTableBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">Arama kriterlerine uygun personel bulunamadı.</td></tr>`;
+                return;
+            }
+            filteredList.forEach(p => {
+                const row = document.createElement('tr');
+                row.dataset.dirId = p.directorateId;
+                row.dataset.index = p.originalIndex;
+                row.innerHTML = createAllPersonnelRowView(p);
+                allPersonnelTableBody.appendChild(row);
+            });
+            updateBulkDeleteButton();
+        }
+
+        // GÜNCELLENDİ: createAllPersonnelRowView fonksiyonuna checkbox eklendi.
+        function createAllPersonnelRowView(p) {
+            return `
+                <td class="px-4 py-4"><input type="checkbox" class="personnel-checkbox" data-sicil="${p.sicil || ''}"></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name || ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.title || ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil || ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">${p.directorateName || ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                    <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button>
+                    <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                </td>`;
+        }
+
+        function createAllPersonnelRowEdit(p,isNew=false){const directorateOptions=directorateData.map(dir=>`<option value="${dir.id}" ${p.directorateId===dir.id?'selected':''}>${dir.name}</option>`).join('');return`<td class="px-4 py-4"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td><td class="px-2 py-2"><select class="personnel-list-input" data-field="directorateId">${directorateOptions}</select></td><td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"><button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button><button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button></td>`}
+        function handleAllPersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const dirId=row.dataset.dirId;const index=parseInt(row.dataset.index,10);const isNew=!row.hasAttribute('data-index');if(action==='edit'){const dir=directorateData.find(d=>d.id===dirId);if(!dir)return;const person=dir.personnelList[index];person.directorateId=dirId;row.innerHTML=createAllPersonnelRowEdit(person)}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const newPersonData={};let newDirId=dirId;inputs.forEach(input=>{if(input.dataset.field==='directorateId'){newDirId=input.value}else{newPersonData[input.dataset.field]=input.value}});if(isNew){const targetDir=directorateData.find(d=>d.id===newDirId);if(targetDir){if(!targetDir.personnelList)targetDir.personnelList=[];targetDir.personnelList.push(newPersonData)}}else{const originalDir=directorateData.find(d=>d.id===dirId);if(!originalDir)return;if(dirId===newDirId){originalDir.personnelList[index]=newPersonData}else{const personToMove=originalDir.personnelList.splice(index,1)[0];const newDir=directorateData.find(d=>d.id===newDirId);if(newDir){if(!newDir.personnelList)newDir.personnelList=[];const updatedPerson={...personToMove,...newPersonData};newDir.personnelList.push(updatedPerson)}}}
+        saveData();refreshAllViews();populateAllPersonnelTable()}else if(action==='delete'){if(button.classList.contains('confirm-delete')){const dir=directorateData.find(d=>d.id===dirId);if(dir&&dir.personnelList){dir.personnelList.splice(index,1);saveData();refreshAllViews();populateAllPersonnelTable()}}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='cancel'){if(isNew){row.remove()}else{populateAllPersonnelTable()}}}
+        
+        // GÜNCELLENDİ: Toplu Yükleme fonksiyonu artık ekleme/güncelleme mantığı ile çalışıyor.
+        function handleAllPersonnelExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+
+                    let addedCount = 0;
+                    let updatedCount = 0;
+                    let failedCount = 0;
+                    let failedList = [];
+
+                    const allPersonnelMap = new Map();
+                    directorateData.forEach(dir => {
+                        dir.personnelList.forEach((p, index) => {
+                            if(p.sicil) allPersonnelMap.set(String(p.sicil), { person: p, dirId: dir.id, index: index });
+                        });
+                    });
+
+                    json.forEach(row => {
+                        const name = getValueFromRow(row, ['Adı Soyadı', 'Adi Soyadi', 'Ad Soyad']);
+                        const title = getValueFromRow(row, ['Unvanı', 'Unvani', 'Unvan']);
+                        const sicil = getValueFromRow(row, ['Sicil', 'Sicil No']);
+                        const birimAdiRaw = getValueFromRow(row, ['Birim Adı', 'Birim_Adi', 'Birim']);
+                        
+                        if (!sicil || !name || !title || !birimAdiRaw) {
+                            failedCount++;
+                            failedList.push(`Eksik Bilgi (Satır: ${JSON.stringify(row)})`);
+                            return;
+                        }
+
+                        const normalizedBirimAdi = normalizeString(birimAdiRaw);
+                        const targetDir = directorateData.find(d => normalizeString(d.name) === normalizedBirimAdi);
+
+                        if (!targetDir) {
+                            failedCount++;
+                            failedList.push(`${String(birimAdiRaw).trim()} (Birim Bulunamadı)`);
+                            return;
+                        }
+
+                        const existingEntry = allPersonnelMap.get(String(sicil));
+                        const newPersonData = { name: String(name).trim(), title: String(title).trim(), sicil: String(sicil).trim() };
+
+                        if (existingEntry) { // Personel mevcut, güncelle
+                            const originalDir = directorateData.find(d => d.id === existingEntry.dirId);
+                            if (originalDir.id === targetDir.id) { // Aynı birimde, direkt güncelle
+                                originalDir.personnelList[existingEntry.index] = newPersonData;
+                            } else { // Farklı birime geçmiş, taşı ve güncelle
+                                originalDir.personnelList.splice(existingEntry.index, 1);
+                                targetDir.personnelList.push(newPersonData);
+                            }
+                            updatedCount++;
+                        } else { // Personel yeni, ekle
+                            targetDir.personnelList.push(newPersonData);
+                            addedCount++;
+                        }
+                    });
+
+                    saveData();
+                    refreshAllViews();
+                    populateAllPersonnelTable();
+
+                    let alertMessage = `${addedCount} yeni personel eklendi.\n${updatedCount} personel güncellendi.\n${failedCount} satır işlenemedi.`;
+                    if (failedCount > 0) {
+                        alertMessage += `\n\nHatalı Satırlar (ilk 5):\n- ${[...new Set(failedList)].slice(0, 5).join('\n- ')}`;
+                    }
+                    alert(alertMessage);
+
+                } catch (err) {
+                    console.error("Toplu personel yükleme hatası:", err);
+                    alert("Excel dosyası işlenirken bir hata oluştu. Lütfen şablonu ve veri formatını kontrol edin.");
+                } finally {
+                    importAllPersonnelExcelInput.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportAllPersonnelToExcel(){const allPersonnel=getAggregatedPersonnel();if(allPersonnel.length===0){alert("Dışa aktarılacak personel bulunmamaktadır.");return}
+        const dataToExport=allPersonnel.map(p=>({"Adı Soyadı":p.name,"Unvanı":p.title,"Sicil":p.sicil,"Birim Adı":p.directorateName}));const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:30},{wch:40},{wch:15},{wch:30}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Tüm Personel Listesi");XLSX.writeFile(wb,`Tüm_Personel_Listesi.xlsx`)}
+        function downloadNormTemplateForGroup(groupType){const groupMapping={'bolge':['bolge'],'tapu':['elazig','malatya','bingol','tunceli'],'kadastro':['kadastro']};const relevantGroups=groupMapping[groupType];const filteredDirs=directorateData.filter(dir=>relevantGroups.includes(dir.group));let templateData=[];filteredDirs.forEach(dir=>{dir.personnel.forEach(p=>{templateData.push({"Birim_Adi":dir.name,"Unvan":p.title,"Norm_Sayisi":p.norm,"Mevcut_Sayisi":p.current})})});const ws=XLSX.utils.json_to_sheet(templateData,{header:["Birim_Adi","Unvan","Norm_Sayisi","Mevcut_Sayisi","Fark"]});for(let i=2;i<=templateData.length+1;i++){ws[`E${i}`]={t:'n',f:`D${i}-C${i}`}}
+        ws['!cols']=[{wch:30},{wch:30},{wch:15},{wch:15},{wch:10}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Norm Kadro Şablonu");XLSX.writeFile(wb,`Norm_Kadro_${groupType.toUpperCase()}_Sablonu.xlsx`)}
+        function handleNormExcelUpload(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e)=>{try{const data=new Uint8Array(e.target.result);const workbook=XLSX.read(data,{type:'array'});const firstSheetName=workbook.SheetNames[0];const worksheet=workbook.Sheets[firstSheetName];const json=XLSX.utils.sheet_to_json(worksheet);let updatedCount=0;let notFoundCount=0;const notFoundList=[];json.forEach(row=>{const birimAdiRaw=getValueFromRow(row,['Birim_Adi','Birim Adı','Birim']);const unvanRaw=getValueFromRow(row,['Unvan','Unvanı']);const normSayisi=parseInt(getValueFromRow(row,['Norm_Sayisi','Norm Sayısı','Norm']),10);const mevcutSayisi=parseInt(getValueFromRow(row,['Mevcut_Sayisi','Mevcut Sayısı','Mevcut']),10);if(!birimAdiRaw||!unvanRaw||isNaN(normSayisi)||isNaN(mevcutSayisi)){notFoundCount++;notFoundList.push(`Hatalı Satır: ${JSON.stringify(row)}`);return}
+        const normalizedBirimAdi=normalizeString(birimAdiRaw);const dir=directorateData.find(d=>normalizeString(d.name)===normalizedBirimAdi);if(dir){const normalizedUnvan=normalizeString(unvanRaw);const personnelItem=dir.personnel.find(p=>normalizeString(p.title)===normalizedUnvan);if(personnelItem){personnelItem.norm=normSayisi;personnelItem.current=mevcutSayisi;updatedCount++}else{notFoundCount++;notFoundList.push(`${String(birimAdiRaw).trim()} -> ${String(unvanRaw).trim()}`)}}else{notFoundCount++;notFoundList.push(`${String(birimAdiRaw).trim()} (Birim bulunamadı)`)}});saveData();refreshAllViews();normUploadReport.classList.remove('hidden');normUploadReport.innerHTML=`
+                        <p class="font-bold text-green-700">${updatedCount} adet kadro satırı başarıyla güncellendi.</p>
+                        <p class="font-bold text-red-700 mt-2">${notFoundCount} adet satır işlenemedi.</p>
+                        ${notFoundList.length>0?`<p class="text-xs text-gray-600 mt-2">Eşleşmeyenler (ilk 5): ${[...new Set(notFoundList)].slice(0,5).join(', ')}...</p>`:''}`}catch(err){console.error("Excel dosyası okunurken hata:",err);alert("Excel dosyası okunurken bir hata oluştu. Lütfen dosya formatını kontrol edin.")}finally{normExcelInput.value=''}};reader.readAsArrayBuffer(file)}
+        function refreshAllViews(){renderSummaryDashboard();renderAllCards()}
+        function refreshModalViews(dir){populatePersonnelList(dir.personnelList,dir.id)}
+        function switchCentralTab(tabId){centralModalTabs.querySelectorAll('button').forEach(btn=>{const targetTab=btn.dataset.tab;if(targetTab===tabId){btn.classList.add('nav-active','border-blue-500','text-blue-600');btn.classList.remove('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}else{btn.classList.remove('nav-active','border-blue-500','text-blue-600');btn.classList.add('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}});centralTabPanes.forEach(pane=>{pane.id===`${tabId}-content`?pane.classList.remove('hidden'):pane.classList.add('hidden')})}
+        
+        // YENİ: Toplu silme butonunun durumunu güncelleyen fonksiyon
+        function updateBulkDeleteButton() {
+            const checkedBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox:checked');
+            const count = checkedBoxes.length;
+            bulkDeleteCount.textContent = count;
+            if (count > 0) {
+                bulkDeleteBtn.disabled = false;
+            } else {
+                bulkDeleteBtn.disabled = true;
+            }
+            const allBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox');
+            selectAllPersonnelCheckbox.checked = allBoxes.length > 0 && count === allBoxes.length;
+        }
+        
+        // --- Olay Dinleyicileri ---
+        document.addEventListener('DOMContentLoaded', () => { loadData(); refreshAllViews(); });
+        closeModalBtn.addEventListener('click',hideModal);modal.addEventListener('click',(e)=>{if(e.target===modal)hideModal()});
+        document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){hideModal();allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto';closeLightbox();}});
+        modalTabs.addEventListener('click',(e)=>{const button=e.target.closest('button');if(button&&button.dataset.tab)switchTab(button.dataset.tab)});
+        exportExcelBtn.addEventListener('click',exportToExcel);
+        personnelSearchInput.addEventListener('input',(e)=>{const searchTerm=normalizeString(e.target.value);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(dir&&dir.personnelList){const filteredList=dir.personnelList.filter(p=>normalizeString(p.name).includes(searchTerm)||normalizeString(p.title).includes(searchTerm)||(p.sicil&&normalizeString(p.sicil.toString()).includes(searchTerm)));populatePersonnelList(filteredList,dir.id)}});
+        exportPersonnelListExcelBtn.addEventListener('click',exportPersonnelListToExcel);
+        importPersonnelExcelBtn.addEventListener('click',()=>importPersonnelExcelInput.click());
+        importPersonnelExcelInput.addEventListener('change',(e)=>handleExcelImport(e,currentDirectorateId));
+        personnelListTableBody.addEventListener('click',handlePersonnelListAction);
+        addPersonnelBtn.addEventListener('click',()=>{const newRow=document.createElement('tr');newRow.innerHTML=createPersonnelRowEdit({});personnelListTableBody.appendChild(newRow)});
+        lightboxCloseBtn.addEventListener('click',closeLightbox);zoomInBtn.addEventListener('click',()=>zoom('in'));zoomOutBtn.addEventListener('click',()=>zoom('out'));
+        closeAllPersonnelModalBtn.addEventListener('click',()=>{allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto'});
+        allPersonnelModal.addEventListener('click',(e)=>{if(e.target===allPersonnelModal){allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto'}});
+        allPersonnelSearchInput.addEventListener('input',populateAllPersonnelTable);
+        allPersonnelTableBody.addEventListener('click',handleAllPersonnelListAction);
+        addAllPersonnelBtn.addEventListener('click',()=>{const newRow=document.createElement('tr');newRow.innerHTML=createAllPersonnelRowEdit({},true);allPersonnelTableBody.insertBefore(newRow,allPersonnelTableBody.firstChild)});
+        importAllPersonnelExcelBtn.addEventListener('click',()=>importAllPersonnelExcelInput.click());
+        importAllPersonnelExcelInput.addEventListener('change',handleAllPersonnelExcelImport);
+        exportAllPersonnelExcelBtn.addEventListener('click',exportAllPersonnelToExcel);
+        centralModalTabs.addEventListener('click', (e) => { const button = e.target.closest('button'); if (button && button.dataset.tab) { switchCentralTab(button.dataset.tab); } });
+        normTemplateButtons.forEach(btn=>{btn.addEventListener('click',(e)=>{const group=e.currentTarget.dataset.group;downloadNormTemplateForGroup(group)})});
+        normUploadButtons.forEach(btn=>{btn.addEventListener('click',(e)=>{currentNormUploadGroup=e.currentTarget.dataset.group;normExcelInput.click()})});
+        normExcelInput.addEventListener('change',handleNormExcelUpload);
+
+        // YENİ: Toplu silme olay dinleyicileri
+        allPersonnelTableBody.addEventListener('change', (e) => {
+            if (e.target.classList.contains('personnel-checkbox')) {
+                updateBulkDeleteButton();
+            }
+        });
+        selectAllPersonnelCheckbox.addEventListener('change', (e) => {
+            allPersonnelTableBody.querySelectorAll('.personnel-checkbox').forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+            updateBulkDeleteButton();
+        });
+        bulkDeleteBtn.addEventListener('click', () => {
+            const checkedBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox:checked');
+            const count = checkedBoxes.length;
+            if (count === 0) return;
+
+            if (confirm(`${count} adet personel kalıcı olarak silinecektir. Emin misiniz?`)) {
+                const sicilsToDelete = new Set();
+                checkedBoxes.forEach(box => {
+                    sicilsToDelete.add(box.dataset.sicil);
+                });
+
+                directorateData.forEach(dir => {
+                    dir.personnelList = dir.personnelList.filter(p => !sicilsToDelete.has(String(p.sicil)));
+                });
+
+                saveData();
+                refreshAllViews();
+                populateAllPersonnelTable();
+            }
+        });
+
+    </script>
 </body>
-
 </html>
