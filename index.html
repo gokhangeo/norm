@@ -252,7 +252,6 @@
         function getValueFromRow(row, possibleKeys) { const normalizedRowKeys = Object.keys(row).map(key => ({ original: key, normalized: normalizeString(key) })); for (const possibleKey of possibleKeys) { const normalizedPossibleKey = normalizeString(possibleKey); const foundKey = normalizedRowKeys.find(rk => rk.normalized === normalizedPossibleKey); if (foundKey) { return row[foundKey.original]; } } return undefined; }
         function saveData() { try { localStorage.setItem('tkgmPortalData', JSON.stringify(directorateData)); } catch (e) { console.error("Veri kaydedilirken hata oluştu:", e); alert("Veriler kaydedilemedi. Tarayıcı depolama alanı dolu olabilir."); } }
         
-        // GÜNCELLENDİ: loadData fonksiyonu artık veri bulup bulamadığını boolean olarak döndürüyor.
         function loadData() {
             const savedData = localStorage.getItem('tkgmPortalData');
             if (savedData) {
@@ -267,7 +266,6 @@
                     directorateData = JSON.parse(JSON.stringify(initialData));
                 }
             } else {
-                // Kayıtlı veri yoksa, hard-coded veriyi başlangıç yapısı olarak kullan.
                 directorateData = JSON.parse(JSON.stringify(initialData));
             }
             directorateData.forEach(d => {
@@ -278,55 +276,61 @@
             return false; // Kayıtlı veri bulunamadı.
         }
 
-        // --- YENİ EKLENEN KISIM BAŞLANGICI ---
+        // --- Otomatik Başlangıç Verisi Yükleme ---
 
         /**
-         * GitHub repozitoriumundan başlangıç norm verilerini yükler.
+         * GitHub repozitoriumundan başlangıç norm ve personel verilerini yükler.
          * Bu fonksiyon sadece tarayıcı deposunda (localStorage) veri yoksa çağrılır.
          */
-        async function loadNormsFromTemplates() {
+        async function loadInitialSetup() {
             console.log("GitHub üzerinden başlangıç şablonları yükleniyor...");
 
+            // YENİ: Personel dosyası da şablonlara eklendi.
             const templatePaths = [
-                'templates/bolge_norm.xlsx',
-                'templates/tapu_norm.xlsx',
-                'templates/kadastro_norm.xlsx'
+                { path: 'templates/bolge_norm.xlsx', type: 'norm' },
+                { path: 'templates/tapu_norm.xlsx', type: 'norm' },
+                { path: 'templates/kadastro_norm.xlsx', type: 'norm' },
+                { path: 'templates/Personel.xlsx', type: 'personnel' }
             ];
 
-            // Tek bir dosyayı indirip işleyen yardımcı fonksiyon
-            const processFile = async (path) => {
+            const processFile = async (fileInfo) => {
                 try {
-                    const response = await fetch(path);
-                    if (!response.ok) {
-                        throw new Error(`Dosya bulunamadı veya yüklenemedi: ${response.status} ${response.statusText}`);
-                    }
+                    const response = await fetch(fileInfo.path);
+                    if (!response.ok) throw new Error(`Dosya bulunamadı: ${response.statusText}`);
                     const arrayBuffer = await response.arrayBuffer();
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    return XLSX.utils.sheet_to_json(worksheet);
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    return { type: fileInfo.type, data: jsonData };
                 } catch (error) {
-                    console.error(`'${path}' şablonu yüklenirken hata oluştu:`, error);
-                    return null; // Hata durumunda null döndür
+                    console.error(`'${fileInfo.path}' şablonu yüklenirken hata oluştu:`, error);
+                    return null;
                 }
             };
             
-            // Tüm şablon dosyalarını paralel olarak indir ve işle
             const results = await Promise.all(templatePaths.map(processFile));
-            const allData = results.flat().filter(data => data !== null); // Hatalı (null) olanları ve boş dizileri temizle
+            const allNormData = results.filter(r => r && r.type === 'norm').flatMap(r => r.data);
+            const allPersonnelData = results.filter(r => r && r.type === 'personnel').flatMap(r => r.data);
 
-            if (allData.length > 0) {
-                updateNormsFromData(allData); // Ana veri listesini güncelle
-                saveData(); // Güncellenmiş veriyi ilk kurulum için localStorage'a kaydet
-                console.log("Norm verileri şablonlardan başarıyla yüklendi ve yerel depolamaya kaydedildi.");
+            if (allNormData.length > 0) {
+                updateNormsFromData(allNormData);
+                console.log("Norm verileri şablonlardan başarıyla yüklendi.");
+            }
+            
+            // YENİ: Personel verilerini işleyen kısım.
+            if (allPersonnelData.length > 0) {
+                updatePersonnelFromData(allPersonnelData);
+                console.log("Personel listesi şablondan başarıyla yüklendi.");
+            }
+
+            if (allNormData.length > 0 || allPersonnelData.length > 0) {
+                saveData();
+                console.log("Tüm başlangıç verileri yerel depolamaya kaydedildi.");
             } else {
                  console.warn("Şablon dosyaları bulunamadı veya boş. Başlangıç verileriyle devam ediliyor.");
             }
         }
         
-        /**
-         * Şablonlardan veya yüklenen Excel'den gelen veriyle ana `directorateData` listesini günceller.
-         * @param {Array} data - Excel'den okunmuş JSON verisi.
-         */
         function updateNormsFromData(data) {
             let updatedCount = 0;
             data.forEach(row => {
@@ -334,12 +338,9 @@
                 const unvanRaw = getValueFromRow(row, ['Unvan', 'Unvanı']);
                 const normSayisi = parseInt(getValueFromRow(row, ['Norm_Sayisi', 'Norm Sayısı', 'Norm']), 10);
                 const mevcutSayisi = parseInt(getValueFromRow(row, ['Mevcut_Sayisi', 'Mevcut Sayısı', 'Mevcut']), 10);
-
                 if (!birimAdiRaw || !unvanRaw || isNaN(normSayisi) || isNaN(mevcutSayisi)) return;
-
                 const normalizedBirimAdi = normalizeString(birimAdiRaw);
                 const dir = directorateData.find(d => normalizeString(d.name) === normalizedBirimAdi);
-
                 if (dir) {
                     const normalizedUnvan = normalizeString(unvanRaw);
                     const personnelItem = dir.personnel.find(p => normalizeString(p.title) === normalizedUnvan);
@@ -353,18 +354,41 @@
              console.log(`${updatedCount} adet kadro satırı Excel verisinden güncellendi.`);
         }
 
+        // YENİ: Personel listesini Excel'den gelen veriye göre güncelleyen fonksiyon.
+        function updatePersonnelFromData(data) {
+            let addedCount = 0;
+            data.forEach(row => {
+                const name = getValueFromRow(row, ['Adı Soyadı', 'Adi Soyadi', 'Ad Soyad']);
+                const title = getValueFromRow(row, ['Unvanı', 'Unvani', 'Unvan']);
+                const sicil = getValueFromRow(row, ['Sicil', 'Sicil No']);
+                const birimAdiRaw = getValueFromRow(row, ['Birim Adı', 'Birim_Adi', 'Birim']);
+
+                if (!sicil || !name || !title || !birimAdiRaw) return;
+
+                const normalizedBirimAdi = normalizeString(birimAdiRaw);
+                const targetDir = directorateData.find(d => normalizeString(d.name) === normalizedBirimAdi);
+
+                if (targetDir) {
+                    if (!targetDir.personnelList) targetDir.personnelList = [];
+                    const newPersonData = { name: String(name).trim(), title: String(title).trim(), sicil: String(sicil).trim() };
+                    targetDir.personnelList.push(newPersonData);
+                    addedCount++;
+                }
+            });
+            console.log(`${addedCount} adet personel Excel verisinden eklendi.`);
+        }
+
+
         /**
          * Uygulamayı başlatan ana fonksiyon. Veriyi yükler ve arayüzü çizer.
          */
         async function initializeApp() {
             const hasSavedData = loadData();
             if (!hasSavedData) {
-                await loadNormsFromTemplates();
+                await loadInitialSetup(); // GÜNCELLENDİ: Artık tek bir setup fonksiyonu çağrılıyor.
             }
             refreshAllViews();
         }
-
-        // --- YENİ EKLENEN KISIM SONU ---
         
         // --- UI Fonksiyonları ---
         function getAggregatedPersonnel() { let allPersonnel = []; directorateData.forEach(dir => { if (dir.personnelList && Array.isArray(dir.personnelList)) { dir.personnelList.forEach((p, index) => { allPersonnel.push({ ...p, directorateName: dir.name, directorateId: dir.id, originalIndex: index }); }); } }); return allPersonnel; }
@@ -544,7 +568,7 @@
                     const json=XLSX.utils.sheet_to_json(worksheet);
                     
                     let notFoundCount = json.length;
-                    updateNormsFromData(json); // Mevcut fonksiyonu kullanarak veriyi güncelle
+                    updateNormsFromData(json);
                     const updatedCount = json.length - notFoundCount;
                     
                     saveData();
@@ -581,7 +605,6 @@
         }
         
         // --- Olay Dinleyicileri ---
-        // GÜNCELLENDİ: Sayfa yüklendiğinde artık initializeApp fonksiyonu çağrılıyor.
         document.addEventListener('DOMContentLoaded', initializeApp);
         
         closeModalBtn.addEventListener('click',hideModal);modal.addEventListener('click',(e)=>{if(e.target===modal)hideModal()});
