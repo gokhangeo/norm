@@ -163,7 +163,7 @@
                              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                  <p class="font-semibold text-blue-800"><i class="fas fa-info-circle mr-2"></i>Nasıl Çalışır?</p>
                                  <p class="text-sm text-blue-700 mt-1">
-                                     İlgili grup için şablonu indirin. Şablonda mevcut durum referans olarak yer alır. Güncelleme yapmak için **'Norm_Sayisi' ve 'Mevcut_Sayisi' sütunlarını** değiştirip dosyayı kaydedin ve ilgili 'Excel Yükle' butonu ile sisteme yükleyin. 'Fark' sütunu Excel'de otomatik hesaplanır.
+                                      İlgili grup için şablonu indirin. Şablonda mevcut durum referans olarak yer alır. Güncelleme yapmak için **'Norm_Sayisi' ve 'Mevcut_Sayisi' sütunlarını** değiştirip dosyayı kaydedin ve ilgili 'Excel Yükle' butonu ile sisteme yükleyin. 'Fark' sütunu Excel'de otomatik hesaplanır.
                                  </p>
                              </div>
                             
@@ -243,7 +243,6 @@
         const normUploadButtons = document.querySelectorAll('.norm-upload-btn');
         const normExcelInput = document.getElementById('norm-excel-input');
         const normUploadReport = document.getElementById('norm-upload-report');
-        // YENİ: Toplu silme elementleri
         const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
         const bulkDeleteCount = document.getElementById('bulk-delete-count');
         const selectAllPersonnelCheckbox = document.getElementById('select-all-personnel-checkbox');
@@ -252,7 +251,120 @@
         function normalizeString(str) { if (typeof str !== 'string') return ''; return str.trim().replace(/\s+/g, ' ').toLocaleLowerCase('tr-TR'); }
         function getValueFromRow(row, possibleKeys) { const normalizedRowKeys = Object.keys(row).map(key => ({ original: key, normalized: normalizeString(key) })); for (const possibleKey of possibleKeys) { const normalizedPossibleKey = normalizeString(possibleKey); const foundKey = normalizedRowKeys.find(rk => rk.normalized === normalizedPossibleKey); if (foundKey) { return row[foundKey.original]; } } return undefined; }
         function saveData() { try { localStorage.setItem('tkgmPortalData', JSON.stringify(directorateData)); } catch (e) { console.error("Veri kaydedilirken hata oluştu:", e); alert("Veriler kaydedilemedi. Tarayıcı depolama alanı dolu olabilir."); } }
-        function loadData() { const savedData = localStorage.getItem('tkgmPortalData'); if (savedData) { try { const parsedData = JSON.parse(savedData); if (Array.isArray(parsedData) && parsedData.every(item => 'id' in item && 'name' in item)) { directorateData = parsedData; } else { throw new Error("Invalid data structure"); } } catch (e) { console.error("Kaydedilmiş veri okunurken hata, başlangıç verileri kullanılıyor:", e); directorateData = JSON.parse(JSON.stringify(initialData)); } } else { directorateData = JSON.parse(JSON.stringify(initialData)); } directorateData.forEach(d => { if (!d.personnelList) d.personnelList = []; if (!d.projects) d.projects = []; if (!d.photos) d.photos = []; }); }
+        
+        // GÜNCELLENDİ: loadData fonksiyonu artık veri bulup bulamadığını boolean olarak döndürüyor.
+        function loadData() {
+            const savedData = localStorage.getItem('tkgmPortalData');
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    if (Array.isArray(parsedData) && parsedData.every(item => 'id' in item && 'name' in item)) {
+                        directorateData = parsedData;
+                        return true; // Kayıtlı veri bulundu ve yüklendi.
+                    } else { throw new Error("Invalid data structure"); }
+                } catch (e) {
+                    console.error("Kaydedilmiş veri okunurken hata, başlangıç verileri kullanılıyor:", e);
+                    directorateData = JSON.parse(JSON.stringify(initialData));
+                }
+            } else {
+                // Kayıtlı veri yoksa, hard-coded veriyi başlangıç yapısı olarak kullan.
+                directorateData = JSON.parse(JSON.stringify(initialData));
+            }
+            directorateData.forEach(d => {
+                if (!d.personnelList) d.personnelList = [];
+                if (!d.projects) d.projects = [];
+                if (!d.photos) d.photos = [];
+            });
+            return false; // Kayıtlı veri bulunamadı.
+        }
+
+        // --- YENİ EKLENEN KISIM BAŞLANGICI ---
+
+        /**
+         * GitHub repozitoriumundan başlangıç norm verilerini yükler.
+         * Bu fonksiyon sadece tarayıcı deposunda (localStorage) veri yoksa çağrılır.
+         */
+        async function loadNormsFromTemplates() {
+            console.log("GitHub üzerinden başlangıç şablonları yükleniyor...");
+
+            const templatePaths = [
+                'templates/bolge_norm.xlsx',
+                'templates/tapu_norm.xlsx',
+                'templates/kadastro_norm.xlsx'
+            ];
+
+            // Tek bir dosyayı indirip işleyen yardımcı fonksiyon
+            const processFile = async (path) => {
+                try {
+                    const response = await fetch(path);
+                    if (!response.ok) {
+                        throw new Error(`Dosya bulunamadı veya yüklenemedi: ${response.status} ${response.statusText}`);
+                    }
+                    const arrayBuffer = await response.arrayBuffer();
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    return XLSX.utils.sheet_to_json(worksheet);
+                } catch (error) {
+                    console.error(`'${path}' şablonu yüklenirken hata oluştu:`, error);
+                    return null; // Hata durumunda null döndür
+                }
+            };
+            
+            // Tüm şablon dosyalarını paralel olarak indir ve işle
+            const results = await Promise.all(templatePaths.map(processFile));
+            const allData = results.flat().filter(data => data !== null); // Hatalı (null) olanları ve boş dizileri temizle
+
+            if (allData.length > 0) {
+                updateNormsFromData(allData); // Ana veri listesini güncelle
+                saveData(); // Güncellenmiş veriyi ilk kurulum için localStorage'a kaydet
+                console.log("Norm verileri şablonlardan başarıyla yüklendi ve yerel depolamaya kaydedildi.");
+            } else {
+                 console.warn("Şablon dosyaları bulunamadı veya boş. Başlangıç verileriyle devam ediliyor.");
+            }
+        }
+        
+        /**
+         * Şablonlardan veya yüklenen Excel'den gelen veriyle ana `directorateData` listesini günceller.
+         * @param {Array} data - Excel'den okunmuş JSON verisi.
+         */
+        function updateNormsFromData(data) {
+            let updatedCount = 0;
+            data.forEach(row => {
+                const birimAdiRaw = getValueFromRow(row, ['Birim_Adi', 'Birim Adı', 'Birim']);
+                const unvanRaw = getValueFromRow(row, ['Unvan', 'Unvanı']);
+                const normSayisi = parseInt(getValueFromRow(row, ['Norm_Sayisi', 'Norm Sayısı', 'Norm']), 10);
+                const mevcutSayisi = parseInt(getValueFromRow(row, ['Mevcut_Sayisi', 'Mevcut Sayısı', 'Mevcut']), 10);
+
+                if (!birimAdiRaw || !unvanRaw || isNaN(normSayisi) || isNaN(mevcutSayisi)) return;
+
+                const normalizedBirimAdi = normalizeString(birimAdiRaw);
+                const dir = directorateData.find(d => normalizeString(d.name) === normalizedBirimAdi);
+
+                if (dir) {
+                    const normalizedUnvan = normalizeString(unvanRaw);
+                    const personnelItem = dir.personnel.find(p => normalizeString(p.title) === normalizedUnvan);
+                    if (personnelItem) {
+                        personnelItem.norm = normSayisi;
+                        personnelItem.current = mevcutSayisi;
+                        updatedCount++;
+                    }
+                }
+            });
+             console.log(`${updatedCount} adet kadro satırı Excel verisinden güncellendi.`);
+        }
+
+        /**
+         * Uygulamayı başlatan ana fonksiyon. Veriyi yükler ve arayüzü çizer.
+         */
+        async function initializeApp() {
+            const hasSavedData = loadData();
+            if (!hasSavedData) {
+                await loadNormsFromTemplates();
+            }
+            refreshAllViews();
+        }
+
+        // --- YENİ EKLENEN KISIM SONU ---
         
         // --- UI Fonksiyonları ---
         function getAggregatedPersonnel() { let allPersonnel = []; directorateData.forEach(dir => { if (dir.personnelList && Array.isArray(dir.personnelList)) { dir.personnelList.forEach((p, index) => { allPersonnel.push({ ...p, directorateName: dir.name, directorateId: dir.id, originalIndex: index }); }); } }); return allPersonnel; }
@@ -314,8 +426,6 @@
             });
             updateBulkDeleteButton();
         }
-
-        // GÜNCELLENDİ: createAllPersonnelRowView fonksiyonuna checkbox eklendi.
         function createAllPersonnelRowView(p) {
             return `
                 <td class="px-4 py-4"><input type="checkbox" class="personnel-checkbox" data-sicil="${p.sicil || ''}"></td>
@@ -328,12 +438,10 @@
                     <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button>
                 </td>`;
         }
-
         function createAllPersonnelRowEdit(p,isNew=false){const directorateOptions=directorateData.map(dir=>`<option value="${dir.id}" ${p.directorateId===dir.id?'selected':''}>${dir.name}</option>`).join('');return`<td class="px-4 py-4"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td><td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td><td class="px-2 py-2"><select class="personnel-list-input" data-field="directorateId">${directorateOptions}</select></td><td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"><button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button><button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button></td>`}
         function handleAllPersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const dirId=row.dataset.dirId;const index=parseInt(row.dataset.index,10);const isNew=!row.hasAttribute('data-index');if(action==='edit'){const dir=directorateData.find(d=>d.id===dirId);if(!dir)return;const person=dir.personnelList[index];person.directorateId=dirId;row.innerHTML=createAllPersonnelRowEdit(person)}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const newPersonData={};let newDirId=dirId;inputs.forEach(input=>{if(input.dataset.field==='directorateId'){newDirId=input.value}else{newPersonData[input.dataset.field]=input.value}});if(isNew){const targetDir=directorateData.find(d=>d.id===newDirId);if(targetDir){if(!targetDir.personnelList)targetDir.personnelList=[];targetDir.personnelList.push(newPersonData)}}else{const originalDir=directorateData.find(d=>d.id===dirId);if(!originalDir)return;if(dirId===newDirId){originalDir.personnelList[index]=newPersonData}else{const personToMove=originalDir.personnelList.splice(index,1)[0];const newDir=directorateData.find(d=>d.id===newDirId);if(newDir){if(!newDir.personnelList)newDir.personnelList=[];const updatedPerson={...personToMove,...newPersonData};newDir.personnelList.push(updatedPerson)}}}
         saveData();refreshAllViews();populateAllPersonnelTable()}else if(action==='delete'){if(button.classList.contains('confirm-delete')){const dir=directorateData.find(d=>d.id===dirId);if(dir&&dir.personnelList){dir.personnelList.splice(index,1);saveData();refreshAllViews();populateAllPersonnelTable()}}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='cancel'){if(isNew){row.remove()}else{populateAllPersonnelTable()}}}
         
-        // GÜNCELLENDİ: Toplu Yükleme fonksiyonu artık ekleme/güncelleme mantığı ile çalışıyor.
         function handleAllPersonnelExcelImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -422,16 +530,43 @@
         const dataToExport=allPersonnel.map(p=>({"Adı Soyadı":p.name,"Unvanı":p.title,"Sicil":p.sicil,"Birim Adı":p.directorateName}));const ws=XLSX.utils.json_to_sheet(dataToExport);ws['!cols']=[{wch:30},{wch:40},{wch:15},{wch:30}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Tüm Personel Listesi");XLSX.writeFile(wb,`Tüm_Personel_Listesi.xlsx`)}
         function downloadNormTemplateForGroup(groupType){const groupMapping={'bolge':['bolge'],'tapu':['elazig','malatya','bingol','tunceli'],'kadastro':['kadastro']};const relevantGroups=groupMapping[groupType];const filteredDirs=directorateData.filter(dir=>relevantGroups.includes(dir.group));let templateData=[];filteredDirs.forEach(dir=>{dir.personnel.forEach(p=>{templateData.push({"Birim_Adi":dir.name,"Unvan":p.title,"Norm_Sayisi":p.norm,"Mevcut_Sayisi":p.current})})});const ws=XLSX.utils.json_to_sheet(templateData,{header:["Birim_Adi","Unvan","Norm_Sayisi","Mevcut_Sayisi","Fark"]});for(let i=2;i<=templateData.length+1;i++){ws[`E${i}`]={t:'n',f:`D${i}-C${i}`}}
         ws['!cols']=[{wch:30},{wch:30},{wch:15},{wch:15},{wch:10}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Norm Kadro Şablonu");XLSX.writeFile(wb,`Norm_Kadro_${groupType.toUpperCase()}_Sablonu.xlsx`)}
-        function handleNormExcelUpload(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e)=>{try{const data=new Uint8Array(e.target.result);const workbook=XLSX.read(data,{type:'array'});const firstSheetName=workbook.SheetNames[0];const worksheet=workbook.Sheets[firstSheetName];const json=XLSX.utils.sheet_to_json(worksheet);let updatedCount=0;let notFoundCount=0;const notFoundList=[];json.forEach(row=>{const birimAdiRaw=getValueFromRow(row,['Birim_Adi','Birim Adı','Birim']);const unvanRaw=getValueFromRow(row,['Unvan','Unvanı']);const normSayisi=parseInt(getValueFromRow(row,['Norm_Sayisi','Norm Sayısı','Norm']),10);const mevcutSayisi=parseInt(getValueFromRow(row,['Mevcut_Sayisi','Mevcut Sayısı','Mevcut']),10);if(!birimAdiRaw||!unvanRaw||isNaN(normSayisi)||isNaN(mevcutSayisi)){notFoundCount++;notFoundList.push(`Hatalı Satır: ${JSON.stringify(row)}`);return}
-        const normalizedBirimAdi=normalizeString(birimAdiRaw);const dir=directorateData.find(d=>normalizeString(d.name)===normalizedBirimAdi);if(dir){const normalizedUnvan=normalizeString(unvanRaw);const personnelItem=dir.personnel.find(p=>normalizeString(p.title)===normalizedUnvan);if(personnelItem){personnelItem.norm=normSayisi;personnelItem.current=mevcutSayisi;updatedCount++}else{notFoundCount++;notFoundList.push(`${String(birimAdiRaw).trim()} -> ${String(unvanRaw).trim()}`)}}else{notFoundCount++;notFoundList.push(`${String(birimAdiRaw).trim()} (Birim bulunamadı)`)}});saveData();refreshAllViews();normUploadReport.classList.remove('hidden');normUploadReport.innerHTML=`
-                        <p class="font-bold text-green-700">${updatedCount} adet kadro satırı başarıyla güncellendi.</p>
-                        <p class="font-bold text-red-700 mt-2">${notFoundCount} adet satır işlenemedi.</p>
-                        ${notFoundList.length>0?`<p class="text-xs text-gray-600 mt-2">Eşleşmeyenler (ilk 5): ${[...new Set(notFoundList)].slice(0,5).join(', ')}...</p>`:''}`}catch(err){console.error("Excel dosyası okunurken hata:",err);alert("Excel dosyası okunurken bir hata oluştu. Lütfen dosya formatını kontrol edin.")}finally{normExcelInput.value=''}};reader.readAsArrayBuffer(file)}
+        
+        function handleNormExcelUpload(event){
+            const file=event.target.files[0];
+            if(!file)return;
+            const reader=new FileReader();
+            reader.onload=(e)=>{
+                try{
+                    const data=new Uint8Array(e.target.result);
+                    const workbook=XLSX.read(data,{type:'array'});
+                    const firstSheetName=workbook.SheetNames[0];
+                    const worksheet=workbook.Sheets[firstSheetName];
+                    const json=XLSX.utils.sheet_to_json(worksheet);
+                    
+                    let notFoundCount = json.length;
+                    updateNormsFromData(json); // Mevcut fonksiyonu kullanarak veriyi güncelle
+                    const updatedCount = json.length - notFoundCount;
+                    
+                    saveData();
+                    refreshAllViews();
+                    normUploadReport.classList.remove('hidden');
+                    normUploadReport.innerHTML=`
+                                     <p class="font-bold text-green-700">${updatedCount} adet kadro satırı başarıyla güncellendi.</p>
+                                     <p class="font-bold text-red-700 mt-2">${notFoundCount} adet satır işlenemedi (eşleşme bulunamadı).</p>`;
+                 }catch(err){
+                     console.error("Excel dosyası okunurken hata:",err);
+                     alert("Excel dosyası okunurken bir hata oluştu. Lütfen dosya formatını kontrol edin.")
+                 }finally{
+                     normExcelInput.value=''
+                 }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
         function refreshAllViews(){renderSummaryDashboard();renderAllCards()}
         function refreshModalViews(dir){populatePersonnelList(dir.personnelList,dir.id)}
         function switchCentralTab(tabId){centralModalTabs.querySelectorAll('button').forEach(btn=>{const targetTab=btn.dataset.tab;if(targetTab===tabId){btn.classList.add('nav-active','border-blue-500','text-blue-600');btn.classList.remove('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}else{btn.classList.remove('nav-active','border-blue-500','text-blue-600');btn.classList.add('border-transparent','text-gray-500','hover:text-gray-700','hover:border-gray-300')}});centralTabPanes.forEach(pane=>{pane.id===`${tabId}-content`?pane.classList.remove('hidden'):pane.classList.add('hidden')})}
         
-        // YENİ: Toplu silme butonunun durumunu güncelleyen fonksiyon
         function updateBulkDeleteButton() {
             const checkedBoxes = allPersonnelTableBody.querySelectorAll('.personnel-checkbox:checked');
             const count = checkedBoxes.length;
@@ -446,7 +581,9 @@
         }
         
         // --- Olay Dinleyicileri ---
-        document.addEventListener('DOMContentLoaded', () => { loadData(); refreshAllViews(); });
+        // GÜNCELLENDİ: Sayfa yüklendiğinde artık initializeApp fonksiyonu çağrılıyor.
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        
         closeModalBtn.addEventListener('click',hideModal);modal.addEventListener('click',(e)=>{if(e.target===modal)hideModal()});
         document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){hideModal();allPersonnelModal.classList.add('hidden');document.body.style.overflow='auto';closeLightbox();}});
         modalTabs.addEventListener('click',(e)=>{const button=e.target.closest('button');if(button&&button.dataset.tab)switchTab(button.dataset.tab)});
@@ -470,8 +607,6 @@
         normTemplateButtons.forEach(btn=>{btn.addEventListener('click',(e)=>{const group=e.currentTarget.dataset.group;downloadNormTemplateForGroup(group)})});
         normUploadButtons.forEach(btn=>{btn.addEventListener('click',(e)=>{currentNormUploadGroup=e.currentTarget.dataset.group;normExcelInput.click()})});
         normExcelInput.addEventListener('change',handleNormExcelUpload);
-
-        // YENİ: Toplu silme olay dinleyicileri
         allPersonnelTableBody.addEventListener('change', (e) => {
             if (e.target.classList.contains('personnel-checkbox')) {
                 updateBulkDeleteButton();
