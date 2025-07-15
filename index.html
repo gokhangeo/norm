@@ -11,7 +11,8 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.75); }
-        .modal-content { max-height: 90vh; }
+        /* MOBİL UYUM: Modal içeriğinin yüksekliği mobil için ayarlandı */
+        .modal-content { max-height: 95vh; }
         .table-header-sticky th { position: sticky; top: 0; background-color: #1e3a8a; color: white; z-index: 10; }
         .fark-pozitif { background-color: #dcfce7; color: #166534; font-weight: bold; }
         .fark-negatif { background-color: #fee2e2; color: #991b1b; font-weight: bold; }
@@ -29,7 +30,7 @@
         .pdf-thumbnail { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 12rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; text-align: center; background-color: #f9fafb; }
         .pdf-thumbnail i { font-size: 3rem; color: #be123c; }
         .pdf-thumbnail span { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; color: #4b5563; word-break: break-all; }
-        #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
         #lightbox.show { opacity: 1; visibility: visible; }
         #lightbox-content-wrapper { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #lightbox-content { max-width: 100%; max-height: 100%; display: block; transition: transform 0.2s ease; cursor: grab; }
@@ -48,22 +49,28 @@
         .save-btn { color: #22c55e; } .save-btn:hover { background-color: #dcfce7; }
         .cancel-btn { color: #6b7280; } .cancel-btn:hover { background-color: #f3f4f6; }
         .confirm-delete { color: white !important; background-color: #ef4444 !important; }
+        /* MOBİL UYUM: Yatayda kaydırılabilir tab menüsü için */
+        .scrollable-tabs::-webkit-scrollbar { display: none; }
+        .scrollable-tabs { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
 
     <header class="bg-white shadow-md sticky top-0 z-40">
+        <!-- MOBİL UYUM: Header padding ve yükseklik ayarlandı -->
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+            <div class="flex items-center justify-between h-16 md:h-20">
                 <div class="flex items-center">
-                    <img src="https://placehold.co/100x40/002d72/ffffff?text=TKGM" alt="TKGM Logo" class="h-10">
-                    <div class="ml-4">
-                        <h1 class="text-xl font-bold text-gray-900">Birim Yönetim Portalı</h1>
-                        <p class="text-sm text-gray-500">Elazığ Bölge Müdürlüğü</p>
+                    <img src="https://placehold.co/100x40/002d72/ffffff?text=TKGM" alt="TKGM Logo" class="h-8 md:h-10">
+                    <div class="ml-3 md:ml-4">
+                        <!-- MOBİL UYUM: Yazı boyutları ayarlandı -->
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">Birim Yönetim Portalı</h1>
+                        <p class="text-xs md:text-sm text-gray-500">Elazığ Bölge Müdürlüğü</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-md font-bold text-blue-900">Tapu ve Kadastro XVI.(Elazığ) Bölge Müdürlüğü</span>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- MOBİL UYUM: Uzun yazı mobil ve tablette gizlendi -->
+                    <span class="hidden lg:block text-sm md:text-md font-bold text-blue-900">Tapu ve Kadastro XVI.(Elazığ) Bölge Müdürlüğü</span>
                     <i class="fa-solid fa-star text-yellow-400"></i>
                     <i class="fa-solid fa-star text-blue-800"></i>
                 </div>
@@ -71,54 +78,135 @@
         </div>
     </header>
 
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- MOBİL UYUM: Ana içerik padding'i ayarlandı -->
+    <main class="container mx-auto p-4 lg:p-8">
         <div id="dashboard-container" class="mb-10">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-                <h2 class="text-3xl font-bold group-header flex-shrink-0" style="margin-bottom: 0;">Genel Durum Panosu</h2>
+                <!-- MOBİL UYUM: Başlık boyutu ayarlandı -->
+                <h2 class="text-2xl md:text-3xl font-bold group-header flex-shrink-0" style="margin-bottom: 0;">Genel Durum Panosu</h2>
                 <div id="summary-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full"></div>
             </div>
         </div>
         <div id="bolge-section" class="mb-10">
-            <h2 class="text-2xl font-bold group-header">Bölge Müdürlüğü</h2>
-            <div id="bolge-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <!-- MOBİL UYUM: Başlık boyutu ayarlandı -->
+            <h2 class="text-xl md:text-2xl font-bold group-header">Bölge Müdürlüğü</h2>
+            <div id="bolge-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
         <div id="kadastro-section" class="mb-10">
-            <h2 class="text-2xl font-bold group-header">Kadastro Müdürlükleri</h2>
-            <div id="kadastro-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <h2 class="text-xl md:text-2xl font-bold group-header">Kadastro Müdürlükleri</h2>
+            <div id="kadastro-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
         <div id="elazig-section" class="mb-10">
-            <h2 class="text-2xl font-bold group-header">Elazığ Tapu Müdürlükleri</h2>
-            <div id="elazig-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <h2 class="text-xl md:text-2xl font-bold group-header">Elazığ Tapu Müdürlükleri</h2>
+            <div id="elazig-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
         <div id="malatya-section" class="mb-10">
-            <h2 class="text-2xl font-bold group-header">Malatya Tapu Müdürlükleri</h2>
-            <div id="malatya-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <h2 class="text-xl md:text-2xl font-bold group-header">Malatya Tapu Müdürlükleri</h2>
+            <div id="malatya-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
         <div id="bingol-section" class="mb-10">
-            <h2 class="text-2xl font-bold group-header">Bingöl Tapu Müdürlükleri</h2>
-            <div id="bingol-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <h2 class="text-xl md:text-2xl font-bold group-header">Bingöl Tapu Müdürlükleri</h2>
+            <div id="bingol-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
         <div id="tunceli-section" class="mb-10">
-            <h2 class="text-2xl font-bold group-header">Tunceli Tapu Müdürlükleri</h2>
-            <div id="tunceli-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+            <h2 class="text-xl md:text-2xl font-bold group-header">Tunceli Tapu Müdürlükleri</h2>
+            <div id="tunceli-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
         </div>
     </main>
 
-    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div id="modal-content" class="bg-white rounded-lg shadow-2xl w-full max-w-6xl flex flex-col modal-content"><div class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg"><h3 id="modal-title" class="text-2xl font-bold text-gray-900"></h3><button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-2x"></i></button></div><div class="flex-grow p-6 overflow-y-auto"><div class="border-b border-gray-200 mb-6"><nav id="modal-tabs" class="-mb-px flex space-x-8" aria-label="Tabs"><button data-tab="personnel" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-users mr-2"></i>Personel Durumu</button><button data-tab="personnel-list" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-address-book mr-2"></i>Personel Listesi</button><button data-tab="projects" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-drafting-compass mr-2"></i>Mimari Projeler</button><button data-tab="photos" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg"><i class="fas fa-camera-retro mr-2"></i>Oda Resimleri</button></nav></div><div id="tab-content"><div id="personnel-content" class="tab-pane"><div class="flex justify-end mb-4"><button id="export-excel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-excel mr-2"></i>Excel'e Aktar</button></div><div class="overflow-x-auto rounded-lg border"><table class="min-w-full divide-y divide-gray-200"><thead class="table-header-sticky"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvan</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Norm</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Mevcut</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Fark</th></tr></thead><tbody id="personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div></div><div id="personnel-list-content" class="tab-pane hidden"><div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4"><div class="relative w-full sm:w-auto flex-grow"><input type="text" id="personnel-search-input" placeholder="Personel ara..." class="w-full pl-10 pr-4 py-2 border rounded-full"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div></div><div class="flex items-center gap-2"><input type="file" id="import-personnel-excel-input" class="hidden" accept=".xlsx, .xls"><button id="import-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-import mr-2"></i>Excel'den Yükle</button><button id="export-personnel-list-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-export mr-2"></i>Listeyi Dışa Aktar</button></div></div><div class="overflow-auto rounded-lg border" style="max-height: 55vh;"><table class="min-w-full divide-y divide-gray-200"><thead class="table-header-sticky"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th><th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider w-32">İşlemler</th></tr></thead><tbody id="personnel-list-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div><div class="mt-4 flex justify-end"><button id="add-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button></div></div><div id="projects-content" class="tab-pane hidden"><div id="projects-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div><div id="photos-content" class="tab-pane hidden"><div id="photos-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div></div></div></div></div>
-    
-    <div id="all-personnel-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-7xl flex flex-col modal-content">
-            <div id="all-personnel-modal-header" class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                <h3 id="all-personnel-modal-title" class="text-2xl font-bold text-gray-900 flex items-center gap-3"><i class="fas fa-users-cog text-blue-800"></i> Merkezi Yönetim Paneli</h3>
-                <button id="close-all-personnel-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-2x"></i></button>
+    <!-- MOBİL UYUM: Modal padding'i ayarlandı -->
+    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 hidden modal-backdrop">
+        <!-- MOBİL UYUM: Modal mobil için tam ekran, büyük ekran için normal -->
+        <div id="modal-content" class="bg-white shadow-2xl w-full h-full sm:h-auto sm:w-full max-w-6xl flex flex-col modal-content sm:rounded-lg">
+            <!-- MOBİL UYUM: Modal başlık padding ve yazı boyutu ayarlandı -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                <h3 id="modal-title" class="text-xl md:text-2xl font-bold text-gray-900"></h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-lg"></i></button>
             </div>
-            <div class="flex-grow p-6 overflow-y-auto">
+            <!-- MOBİL UYUM: Modal içerik padding'i ayarlandı -->
+            <div class="flex-grow p-4 md:p-6 overflow-y-auto">
+                <!-- MOBİL UYUM: Tab menüsü yatayda kaydırılabilir yapıldı -->
                 <div class="border-b border-gray-200 mb-6">
-                    <nav id="central-modal-tabs" class="-mb-px flex space-x-8" aria-label="Tabs">
-                        <button data-tab="central-personnel-list" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg">
+                    <nav id="modal-tabs" class="scrollable-tabs -mb-px flex space-x-4 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
+                        <button data-tab="personnel" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg"><i class="fas fa-users mr-2"></i>Personel Durumu</button>
+                        <button data-tab="personnel-list" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg"><i class="fas fa-address-book mr-2"></i>Personel Listesi</button>
+                        <button data-tab="projects" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg"><i class="fas fa-drafting-compass mr-2"></i>Mimari Projeler</button>
+                        <button data-tab="photos" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg"><i class="fas fa-camera-retro mr-2"></i>Oda Resimleri</button>
+                    </nav>
+                </div>
+                <div id="tab-content">
+                    <div id="personnel-content" class="tab-pane">
+                        <div class="flex justify-end mb-4">
+                            <button id="export-excel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-file-excel mr-2"></i>Excel'e Aktar</button>
+                        </div>
+                        <div class="overflow-x-auto rounded-lg border">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="table-header-sticky">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvan</th>
+                                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider">Norm</th>
+                                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider">Mevcut</th>
+                                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider">Fark</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="personnel-list-content" class="tab-pane hidden">
+                        <!-- MOBİL UYUM: Butonlar ve arama kutusu alt alta gelecek şekilde ayarlandı -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                            <div class="relative w-full sm:w-auto flex-grow">
+                                <input type="text" id="personnel-search-input" placeholder="Personel ara..." class="w-full pl-10 pr-4 py-2 border rounded-full">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <input type="file" id="import-personnel-excel-input" class="hidden" accept=".xlsx, .xls">
+                                <button id="import-personnel-excel-btn" class="w-1/2 sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-file-import mr-2"></i>Yükle</button>
+                                <button id="export-personnel-list-excel-btn" class="w-1/2 sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-file-export mr-2"></i>Aktar</button>
+                            </div>
+                        </div>
+                        <div class="overflow-auto rounded-lg border" style="max-height: 55vh;">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="table-header-sticky">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th>
+                                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider w-28">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="personnel-list-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button id="add-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button>
+                        </div>
+                    </div>
+                    <div id="projects-content" class="tab-pane hidden">
+                        <div id="projects-gallery" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                    <div id="photos-content" class="tab-pane hidden">
+                        <div id="photos-gallery" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="all-personnel-modal" class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-none sm:rounded-lg shadow-2xl w-full h-full sm:h-auto max-w-7xl flex flex-col modal-content">
+            <div id="all-personnel-modal-header" class="flex items-center justify-between p-4 md:p-5 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                <h3 id="all-personnel-modal-title" class="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-3"><i class="fas fa-users-cog text-blue-800"></i> Merkezi Yönetim</h3>
+                <button id="close-all-personnel-modal-btn" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times fa-lg"></i></button>
+            </div>
+            <div class="flex-grow p-4 md:p-6 overflow-y-auto">
+                <div class="border-b border-gray-200 mb-6">
+                    <nav id="central-modal-tabs" class="scrollable-tabs -mb-px flex space-x-4 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
+                        <button data-tab="central-personnel-list" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg">
                             <i class="fas fa-users mr-2"></i>Personel Listesi
                         </button>
-                        <button data-tab="central-norm-management" class="whitespace-nowrap py-4 px-1 border-b-4 font-medium text-lg">
+                        <button data-tab="central-norm-management" class="whitespace-nowrap py-3 px-2 md:py-4 md:px-1 border-b-4 font-medium text-sm md:text-lg">
                             <i class="fas fa-sitemap mr-2"></i>Toplu Norm Yönetimi
                         </button>
                     </nav>
@@ -126,35 +214,36 @@
                 
                 <div id="central-tab-content">
                     <div id="central-personnel-list-content" class="central-tab-pane">
-                        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                            <div class="relative w-full sm:w-auto flex-grow">
+                        <!-- MOBİL UYUM: Butonlar ve arama kutusu alt alta gelecek şekilde ayarlandı -->
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                            <div class="relative w-full md:w-auto flex-grow">
                                 <input type="text" id="all-personnel-search-input" placeholder="Personel veya Birim Ara..." class="w-full pl-10 pr-4 py-2 border rounded-full">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
                             </div>
-                            <div class="flex items-center gap-2 flex-wrap justify-end">
-                                <button id="bulk-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-trash-alt mr-2"></i>Seçilenleri Sil (<span id="bulk-delete-count">0</span>)</button>
+                            <div class="flex items-center gap-2 flex-wrap justify-center md:justify-end w-full md:w-auto">
+                                <button id="bulk-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm"><i class="fas fa-trash-alt mr-1"></i>Sil (<span id="bulk-delete-count">0</span>)</button>
                                 <input type="file" id="import-all-personnel-excel-input" class="hidden" accept=".xlsx, .xls">
-                                <button id="import-all-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-import mr-2"></i>Yükle/Güncelle</button>
-                                <button id="export-all-personnel-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-file-export mr-2"></i>Tüm Listeyi Aktar</button>
+                                <button id="import-all-personnel-excel-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-3 rounded-lg text-sm"><i class="fas fa-file-import mr-1"></i>Yükle/Güncelle</button>
+                                <button id="export-all-personnel-excel-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-sm"><i class="fas fa-file-export mr-1"></i>Aktar</button>
                             </div>
                         </div>
                         <div class="overflow-auto rounded-lg border" style="max-height: 60vh;">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="table-header-sticky">
                                     <tr>
-                                        <th scope="col" class="px-4 py-3 w-4"><input type="checkbox" id="select-all-personnel-checkbox"></th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sicil</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Birim</th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider w-32">İşlemler</th>
+                                        <th scope="col" class="px-2 py-3 sm:px-4"><input type="checkbox" id="select-all-personnel-checkbox"></th>
+                                        <th scope="col" class="px-2 py-3 sm:px-6 text-left text-xs font-medium uppercase tracking-wider">Adı Soyadı</th>
+                                        <th scope="col" class="px-2 py-3 sm:px-6 text-left text-xs font-medium uppercase tracking-wider">Unvanı</th>
+                                        <th scope="col" class="px-2 py-3 sm:px-6 text-left text-xs font-medium uppercase tracking-wider">Sicil</th>
+                                        <th scope="col" class="px-2 py-3 sm:px-6 text-left text-xs font-medium uppercase tracking-wider">Birim</th>
+                                        <th scope="col" class="px-2 py-3 sm:px-6 text-center text-xs font-medium uppercase tracking-wider w-28">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody id="all-personnel-table-body" class="bg-white divide-y divide-gray-200"></tbody>
                             </table>
                         </div>
                         <div class="mt-4 flex justify-end">
-                            <button id="add-all-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button>
+                            <button id="add-all-personnel-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>Yeni Personel Ekle</button>
                         </div>
                     </div>
 
@@ -205,7 +294,6 @@
         let currentDirectorateId = null;
         let currentZoom = 1, isPanning = false, startX, startY, translateX, translateY;
         let currentNormUploadGroup = '';
-        // HATA DÜZELTME: GitHub Pages'da doğru dosya yolunu oluşturmak için temel URL eklendi.
         const GITHUB_REPO_BASE_URL = 'https://gokhangeo.github.io/norm/';
         const initialData = [ { id: 'bolge_md', name: 'BÖLGE MÜDÜRLÜĞÜ', group: 'bolge', personnel: [ { title: 'Bölge Müdürü', norm: 1, current: 1 }, { title: 'Bölge Müdür Yrd.', norm: 2, current: 2 }, { title: 'Şube Müdürü', norm: 5, current: 5 }, { title: 'Mühendis', norm: 2, current: 0 }, { title: 'Avukat', norm: 1, current: 0 }, { title: 'İşlem Yapan Personel', norm: 14, current: 22 }, { title: 'Programcı', norm: 1, current: 0 }, { title: 'Arşiv Görevlisi', norm: 1, current: 1 }, { title: 'Şoför', norm: 7, current: 7 }, { title: 'Güvenlik Personeli', norm: 0, current: 3 }, { title: 'Destek Personeli', norm: 3, current: 8 } ], personnelList: [], projects: [], photos: [] }, { id: 'elazig_km', name: 'ELAZIĞ KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 11, current: 13 }, { title: 'Teknisyen/Tekniker', norm: 23, current: 33 }, { title: 'İşlem Yapan Personel', norm: 3, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 5, current: 6 }, { title: 'Şoför', norm: 1, current: 1 }, { title: 'Güvenlik Personeli', norm: 0, current: 0 } ], personnelList: [], projects: [], photos: [] }, { id: 'malatya_km', name: 'MALATYA KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 2, current: 2 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 15, current: 4 }, { title: 'Teknisyen/Tekniker', norm: 28, current: 36 }, { title: 'İşlem Yapan Personel', norm: 3, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 6, current: 4 }, { title: 'Şoför', norm: 2, current: 1 }, { title: 'Güvenlik Personeli', norm: 1, current: 6 } ], personnelList: [], projects: [], photos: [] }, { id: 'bingol_km', name: 'BİNGÖL KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 4, current: 8 }, { title: 'Teknisyen/Tekniker', norm: 11, current: 12 }, { title: 'İşlem Yapan Personel', norm: 1, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 3, current: 4 }, { title: 'Şoför', norm: 1, current: 1 }, { title: 'Güvenlik Personeli', norm: 5, current: 5 } ], personnelList: [], projects: [], photos: [] }, { id: 'tunceli_km', name: 'TUNCELİ KM', group: 'kadastro', personnel: [ { title: 'Kadastro Müdürü', norm: 1, current: 1 }, { title: 'Kadastro Müdür Yrd.', norm: 1, current: 0 }, { title: 'Kadastro Üyesi', norm: 1, current: 0 }, { title: 'Mühendis', norm: 3, current: 8 }, { title: 'Teknisyen/Tekniker', norm: 5, current: 17 }, { title: 'İşlem Yapan Personel', norm: 1, current: 0 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 3, current: 2 }, { title: 'Şoför', norm: 1, current: 0 }, { title: 'Güvenlik Personeli', norm: 1, current: 0 } ], personnelList: [], projects: [], photos: [] }, { id: 'elazig_tm', name: 'ELAZIĞ TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 7, current: 6 }, { title: 'İşlem Yapan Personel', norm: 40, current: 39 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 4, current: 3 }], personnelList: [], projects: [], photos: [] }, { id: 'agin_tm', name: 'AĞIN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'alacakaya_tm', name: 'ALACAKAYA TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'aricak_tm', name: 'ARICAK TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'baskil_tm', name: 'BASKİL TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'karakocan_tm', name: 'KARAKOÇAN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 4 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'keban_tm', name: 'KEBAN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kovancilar_tm', name: 'KOVANCILAR TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 6 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'maden_tm', name: 'MADEN TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'palu_tm', name: 'PALU TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'sivrice_tm', name: 'SİVRİCE TM', group: 'elazig', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'battalgazi_tm', name: 'BATTALGAZİ TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 3, current: 3 }, { title: 'İşlem Yapan Personel', norm: 17, current: 23 }, { title: 'Arşiv Görevlisi', norm: 2, current: 1 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'yesilyurt_tm', name: 'YEŞİLYURT TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 3, current: 3 }, { title: 'İşlem Yapan Personel', norm: 19, current: 23 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 2, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'akcadag_tm', name: 'AKÇADAĞ TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 7 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'arapgir_tm', name: 'ARAPGİR TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'arguvan_tm', name: 'ARGUVAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'darende_tm', name: 'DARENDE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 4 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'dogansehir_tm', name: 'DOĞANŞEHİR TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 5 }, { title: 'Arşiv Görevlisi', norm: 2, current: 1 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'doganyol_tm', name: 'DOĞANYOL TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'hekimhan_tm', name: 'HEKİMHAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'kale_tm', name: 'KALE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kuluncak_tm', name: 'KULUNCAK TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'puturge_tm', name: 'PÜTÜRGE TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'yazihan_tm', name: 'YAZIHAN TM', group: 'malatya', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'tunceli_tm', name: 'TUNCELİ TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 4, current: 7 }, { title: 'Arşiv Görevlisi', norm: 3, current: 0 }, { title: 'Destek Personeli', norm: 2, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'cemisgezek_tm', name: 'ÇEMİŞGEZEK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'hozat_tm', name: 'HOZAT TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'mazgirt_tm', name: 'MAZGİRT TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'nazimiye_tm', name: 'NAZİMİYE TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'ovacik_tm', name: 'OVACIK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'pertek_tm', name: 'PERTEK TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 4 }, { title: 'Arşiv Görevlisi', norm: 2, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'pulumur_tm', name: 'PÜLÜMÜR TM', group: 'tunceli', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 1 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'bingol_tm', name: 'BİNGÖL TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 2, current: 1 }, { title: 'İşlem Yapan Personel', norm: 12, current: 13 }, { title: 'Arşiv Görevlisi', norm: 1, current: 1 }, { title: 'Destek Personeli', norm: 2, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'adakli_tm', name: 'ADAKLI TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'genc_tm', name: 'GENÇ TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 2 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'karliova_tm', name: 'KARLIOVA TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 3, current: 3 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'kigi_tm', name: 'KİĞI TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 1 }], personnelList: [], projects: [], photos: [] }, { id: 'solhan_tm', name: 'SOLHAN TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 1 }, { title: 'Müdür Yrd.', norm: 0, current: 0 }, { title: 'İşlem Yapan Personel', norm: 2, current: 3 }, { title: 'Arşiv Görevlisi', norm: 1, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 2 }], personnelList: [], projects: [], photos: [] }, { id: 'yayladere_tm', name: 'YAYLADERE TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 1, current: 1 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 1, current: 0 }], personnelList: [], projects: [], photos: [] }, { id: 'yedisu_tm', name: 'YEDİSU TM', group: 'bingol', personnel: [{ title: 'Müdür', norm: 1, current: 0 }, { title: 'Müdür Yrd.', norm: 0, current: 1 }, { title: 'İşlem Yapan Personel', norm: 2, current: 2 }, { title: 'Arşiv Görevlisi', norm: 0, current: 0 }, { title: 'Destek Personeli', norm: 0, current: 0 }], personnelList: [], projects: [], photos: [] }];
         
@@ -296,7 +384,6 @@
 
             const processFile = async (fileInfo) => {
                 try {
-                    // HATA DÜZELTME: Göreceli yol yerine tam (mutlak) URL oluşturuluyor.
                     const fullPath = GITHUB_REPO_BASE_URL + fileInfo.path;
                     const response = await fetch(fullPath);
                     if (!response.ok) throw new Error(`Dosya bulunamadı: ${response.statusText} (${fullPath})`);
@@ -306,7 +393,6 @@
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
                     return { type: fileInfo.type, data: jsonData };
                 } catch (error) {
-                    // HATA DÜZELTME: Hata mesajına tam yol eklendi.
                     console.error(`'${fileInfo.path}' şablonu yüklenirken hata oluştu:`, error);
                     return null;
                 }
@@ -401,10 +487,10 @@
         function renderAllCards(){if(!directorateData||directorateData.length===0)return;document.querySelectorAll('[id$="-grid"]').forEach(grid=>grid.innerHTML='');directorateData.forEach(dir=>{const grid=document.getElementById(`${dir.group}-grid`);if(!grid)return;const totalNorm=dir.personnel.reduce((sum,p)=>sum+(p.norm||0),0);const totalCurrent=dir.personnel.reduce((sum,p)=>sum+(p.current||0),0);const difference=totalCurrent-totalNorm;const occupancyRate=totalNorm>0?Math.round((totalCurrent/totalNorm)*100):(totalCurrent>0?100:0);let progressBarColor='bg-red-500';if(occupancyRate>=90)progressBarColor='bg-green-500';else if(occupancyRate>=70)progressBarColor='bg-yellow-400';let diffClass='fark-sifir';let diffIcon='fa-minus';if(difference>0){diffClass='bg-green-200 text-green-800';diffIcon='fa-arrow-up'}else if(difference<0){diffClass='bg-red-200 text-red-800';diffIcon='fa-arrow-down'}
         const card=document.createElement('div');card.className='bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1';card.dataset.id=dir.id;card.innerHTML=`<div class="p-5"><div class="flex justify-between items-start"><h3 class="text-lg font-bold text-gray-900 truncate pr-2">${dir.name}</h3><span class="text-xs font-bold px-2 py-1 rounded-full ${diffClass}"><i class="fas ${diffIcon} mr-1"></i> ${difference>=0?'+':''}${difference}</span></div><div class="mt-4"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold text-gray-500">Doluluk Oranı</span><span class="text-sm font-bold ${progressBarColor.replace('bg','text')}">${occupancyRate}%</span></div><div class="progress-bar-container"><div class="progress-bar ${progressBarColor}" style="width: ${occupancyRate}%;"></div></div></div></div><div class="px-5 pb-5 flex justify-between items-center text-sm text-gray-600"><span>Norm: <b class="text-gray-900">${totalNorm}</b></span><span>Mevcut: <b class="text-gray-900">${totalCurrent}</b></span></div><div class="bg-gray-50 px-5 py-3 text-right"><span class="text-sm font-medium text-blue-600 hover:text-blue-800">Detayları Gör <i class="fas fa-arrow-right ml-1"></i></span></div>`;card.addEventListener('click',()=>showModal(dir.id));grid.appendChild(card)})}
         function showModal(id){currentDirectorateId=id;const dir=directorateData.find(d=>d.id===id);if(!dir)return;modalTitle.textContent=dir.name;populatePersonnelTable(dir);populatePersonnelList(dir.personnelList||[],dir.id);personnelSearchInput.value='';populateGallery(projectsGallery,dir.projects,'projects');populateGallery(photosGallery,dir.photos,'photos');switchTab('personnel');modal.classList.remove('hidden');document.body.style.overflow='hidden'}
-        function populatePersonnelTable(dir){personnelTableBody.innerHTML='';personnelTableBody.dataset.id=dir.id;dir.personnel.forEach((p,index)=>{const difference=(p.current||0)-(p.norm||0);let diffClass='fark-sifir';if(difference>0)diffClass='fark-pozitif';if(difference<0)diffClass='fark-negatif';const row=document.createElement('tr');row.dataset.index=index;row.innerHTML=`<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.title}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.norm||0}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.current||0}</div></td><td class="px-6 py-4 whitespace-nowrap text-sm text-center fark-cell ${diffClass}">${difference>=0?'+':''}${difference}</td>`;personnelTableBody.appendChild(row)})}
+        function populatePersonnelTable(dir){personnelTableBody.innerHTML='';personnelTableBody.dataset.id=dir.id;dir.personnel.forEach((p,index)=>{const difference=(p.current||0)-(p.norm||0);let diffClass='fark-sifir';if(difference>0)diffClass='fark-pozitif';if(difference<0)diffClass='fark-negatif';const row=document.createElement('tr');row.dataset.index=index;row.innerHTML=`<td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.title}</td><td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.norm||0}</div></td><td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm"><div class="readonly-cell">${p.current||0}</div></td><td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-center fark-cell ${diffClass}">${difference>=0?'+':''}${difference}</td>`;personnelTableBody.appendChild(row)})}
         function populatePersonnelList(list,dirId){personnelListTableBody.innerHTML='';if(!list||list.length===0){personnelListTableBody.innerHTML=`<tr><td colspan="4" class="text-center py-10 text-gray-500">Bu birim için personel bilgisi bulunamadı.<br>Yukarıdaki 'Excel'den Yükle' butonu ile liste ekleyebilirsiniz.</td></tr>`;return}
         list.forEach((p,index)=>{const row=document.createElement('tr');row.dataset.index=index;row.dataset.dirId=dirId;row.innerHTML=createPersonnelRowView(p);personnelListTableBody.appendChild(row)})}
-        function createPersonnelRowView(p){return` <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name||''}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.title||''}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil||''}</td> <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button> <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button> </td> `}
+        function createPersonnelRowView(p){return` <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-600">${p.title||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil||''}</td> <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button> <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button> </td> `}
         function createPersonnelRowEdit(p){return` <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="name" value="${p.name||''}" placeholder="Adı Soyadı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="title" value="${p.title||''}" placeholder="Unvanı"></td> <td class="px-2 py-2"><input type="text" class="personnel-list-input" data-field="sicil" value="${p.sicil||''}" placeholder="Sicil No"></td> <td class="px-2 py-2 whitespace-nowrap text-center text-sm font-medium"> <button class="action-btn save-btn" data-action="save" title="Kaydet"><i class="fas fa-check"></i></button> <button class="action-btn cancel-btn" data-action="cancel" title="İptal"><i class="fas fa-times"></i></button> </td> `}
         function handlePersonnelListAction(e){const button=e.target.closest('button.action-btn');if(!button)return;const action=button.dataset.action;const row=button.closest('tr');const index=parseInt(row.dataset.index,10);const dir=directorateData.find(d=>d.id===currentDirectorateId);if(!dir)return;if(action==='edit'){row.innerHTML=createPersonnelRowEdit(dir.personnelList[index])}else if(action==='delete'){if(button.classList.contains('confirm-delete')){dir.personnelList.splice(index,1);saveData();refreshModalViews(dir);refreshAllViews()}else{button.innerHTML='<i class="fas fa-check"></i> Onayla';button.classList.add('confirm-delete');setTimeout(()=>{if(button){button.innerHTML='<i class="fas fa-trash-alt"></i>';button.classList.remove('confirm-delete')}},3000)}}else if(action==='save'){const inputs=row.querySelectorAll('.personnel-list-input');const updatedPerson={};inputs.forEach(input=>{updatedPerson[input.dataset.field]=input.value});if(isNaN(index)){dir.personnelList.push(updatedPerson)}else{dir.personnelList[index]=updatedPerson}
         saveData();refreshModalViews(dir);refreshAllViews()}else if(action==='cancel'){if(isNaN(index)){row.remove()}else{row.innerHTML=createPersonnelRowView(dir.personnelList[index])}}}
@@ -454,12 +540,12 @@
         }
         function createAllPersonnelRowView(p) {
             return `
-                <td class="px-4 py-4"><input type="checkbox" class="personnel-checkbox" data-sicil="${p.sicil || ''}"></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name || ''}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.title || ''}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.sicil || ''}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">${p.directorateName || ''}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                <td class="px-2 py-3 sm:px-4"><input type="checkbox" class="personnel-checkbox" data-sicil="${p.sicil || ''}"></td>
+                <td class="px-2 py-3 sm:px-6 whitespace-nowrap text-sm font-semibold text-gray-900">${p.name || ''}</td>
+                <td class="px-2 py-3 sm:px-6 whitespace-nowrap text-sm text-gray-600">${p.title || ''}</td>
+                <td class="px-2 py-3 sm:px-6 whitespace-nowrap text-sm text-gray-600">${p.sicil || ''}</td>
+                <td class="px-2 py-3 sm:px-6 whitespace-nowrap text-sm text-gray-600 font-medium">${p.directorateName || ''}</td>
+                <td class="px-2 py-3 sm:px-6 whitespace-nowrap text-center text-sm font-medium">
                     <button class="action-btn edit-btn" data-action="edit" title="Düzenle"><i class="fas fa-pencil-alt"></i></button>
                     <button class="action-btn delete-btn-action" data-action="delete" title="Sil"><i class="fas fa-trash-alt"></i></button>
                 </td>`;
@@ -669,4 +755,6 @@
 </html>
 ```
 
-Bazı değişiklikler yaptım. GitHub Pages'ten şablon dosyalarını alırken oluşan hataları düzelttim. Sorun, dosya yollarının doğru bir şekilde çözümlenmemesinden kaynaklanıyordu; bu yüzden kodu, her bir dosyayı almadan önce o dosya için tam ve doğru URL'yi oluşturacak şekilde güncelled
+Müdürüm, bu güncellemelerle portalınız artık her türlü cihazda harika bir kullanıcı deneyimi sunacaktır. Mobil uyumluluk, projenizin modern ve profesyonel standartlarda olduğunun en önemli göstergelerinden biridir.
+
+Lütfen kodu GitHub'a yükleyip telefonunuzdan test edin. Başka bir geliştirme talebiniz olursa, her zamanki gibi buraday
